@@ -15,7 +15,6 @@ import {
 import { AgendaItem, MonthSchedule, WeekSchedule } from '../types';
 import { useAppContext } from '../context/AppContext';
 import { useNotification } from '../components/Notification';
-import MigrationButton from '../components/MigrationButton';
 import { signOut } from 'firebase/auth';
 import { auth } from '../firebase/config';
 
@@ -2257,11 +2256,6 @@ const Admin: React.FC = () => {
         {activeTab === 'settings' && (
           <div>
             <h2 className="text-2xl font-bold text-zinc-100 mb-6">Configurações</h2>
-            
-            {/* Migração para Firebase */}
-            <div className="mb-6">
-              <MigrationButton />
-            </div>
 
             <div className="bg-zinc-800 rounded-lg p-6 border border-zinc-700">
               <h3 className="text-lg font-semibold text-zinc-100 mb-4">Informações do Ministério</h3>

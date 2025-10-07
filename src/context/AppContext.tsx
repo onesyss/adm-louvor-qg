@@ -78,22 +78,32 @@ export const AppProvider: React.FC<AppProviderProps> = ({ children }) => {
   // Estado dos músicos
   const [musicians, setMusicians] = useState<Musician[]>(initialMusicians);
 
-  // Carregar músicos do Firestore apenas uma vez na inicialização
+  // Carregar músicos do Firestore com sincronização em tempo real
   useEffect(() => {
-    const loadInitialData = async () => {
-      try {
-        const unsubscribe = subscribeToCollection('musicians', (data) => {
-          if (data.length > 0) {
-            setMusicians(data as Musician[]);
-          }
-          // Desinscrever após a primeira carga
-          unsubscribe();
-        });
-      } catch (error) {
-        console.error('Error loading musicians:', error);
+    console.log('🔄 Configurando sincronização em tempo real para musicians...');
+    console.log('📍 Estado atual de musicians:', musicians.length);
+    
+    let unsubscribe: (() => void) | null = null;
+    
+    try {
+      unsubscribe = subscribeToCollection('musicians', (data) => {
+        console.log('🔔 CALLBACK MUSICIANS DISPAROU! Dados:', data.length, 'documentos');
+        console.log('📊 Dados recebidos:', data);
+        console.log('🔄 Atualizando estado de musicians...');
+        setMusicians(data as Musician[]);
+        console.log('✅ Estado de musicians atualizado para:', data.length, 'documentos');
+      });
+      console.log('✅ onSnapshot de musicians configurado com sucesso!');
+    } catch (error) {
+      console.error('❌ Error setting up musicians sync:', error);
+    }
+    
+    return () => {
+      if (unsubscribe) {
+        console.log('❌ Cancelando sincronização de musicians');
+        unsubscribe();
       }
     };
-    loadInitialData();
   }, []);
 
   // Dados iniciais das músicas
@@ -169,22 +179,26 @@ export const AppProvider: React.FC<AppProviderProps> = ({ children }) => {
   // Estado das músicas
   const [songs, setSongs] = useState<Song[]>(initialSongs);
 
-  // Carregar músicas do Firestore apenas uma vez na inicialização
+  // Carregar músicas do Firestore com sincronização em tempo real
   useEffect(() => {
-    const loadInitialData = async () => {
-      try {
-        const unsubscribe = subscribeToCollection('songs', (data) => {
-          if (data.length > 0) {
-            setSongs(data as Song[]);
-          }
-          // Desinscrever após a primeira carga
-          unsubscribe();
-        });
-      } catch (error) {
-        console.error('Error loading songs:', error);
-      }
-    };
-    loadInitialData();
+    console.log('🔄 Configurando sincronização em tempo real para songs...');
+    try {
+      const unsubscribe = subscribeToCollection('songs', (data) => {
+        console.log('✅ Dados de songs atualizados:', data.length, 'documentos');
+        // Se não tem dados no Firestore, manter dados iniciais
+        if (data.length === 0) {
+          console.log('⚠️ Collection songs vazia, mantendo dados iniciais');
+        } else {
+          setSongs(data as Song[]);
+        }
+      });
+      return () => {
+        console.log('❌ Cancelando sincronização de songs');
+        unsubscribe();
+      };
+    } catch (error) {
+      console.error('Error setting up songs sync:', error);
+    }
   }, []);
 
   // Estado da agenda
@@ -199,154 +213,157 @@ export const AppProvider: React.FC<AppProviderProps> = ({ children }) => {
   // Estado das atividades
   const [activities, setActivities] = useState<Activity[]>([]);
 
-  // Carregar agenda do Firestore apenas uma vez
+  // Carregar agenda do Firestore com sincronização em tempo real
   useEffect(() => {
-    const loadInitialData = async () => {
-      try {
-        const unsubscribe = subscribeToCollection('agendaItems', (data) => {
-          setAgendaItems(data as AgendaItem[]);
-          unsubscribe();
-        });
-      } catch (error) {
-        console.error('Error loading agenda:', error);
-      }
-    };
-    loadInitialData();
+    console.log('🔄 Configurando sincronização em tempo real para agendaItems...');
+    try {
+      const unsubscribe = subscribeToCollection('agendaItems', (data) => {
+        console.log('✅ Dados de agendaItems atualizados:', data.length, 'documentos');
+        setAgendaItems(data as AgendaItem[]);
+      });
+      return () => {
+        console.log('❌ Cancelando sincronização de agendaItems');
+        unsubscribe();
+      };
+    } catch (error) {
+      console.error('Error setting up agendaItems sync:', error);
+    }
   }, []);
 
-  // Carregar escalas do Firestore apenas uma vez
+  // Carregar escalas do Firestore com sincronização em tempo real
   useEffect(() => {
-    const loadInitialData = async () => {
-      try {
-        const unsubscribe = subscribeToCollection('schedules', (data) => {
+    console.log('🔄 Configurando sincronização em tempo real para schedules...');
+    try {
+      const unsubscribe = subscribeToCollection('schedules', (data) => {
+        console.log('✅ Dados de schedules atualizados:', data.length, 'documentos');
+        if (data.length === 0) {
+          console.log('⚠️ Collection schedules vazia');
+        } else {
           setSchedules(data as MonthSchedule[]);
-          unsubscribe();
-        });
-      } catch (error) {
-        console.error('Error loading schedules:', error);
-      }
-    };
-    loadInitialData();
+        }
+      });
+      return () => {
+        console.log('❌ Cancelando sincronização de schedules');
+        unsubscribe();
+      };
+    } catch (error) {
+      console.error('Error setting up schedules sync:', error);
+    }
   }, []);
 
-  // Carregar repertórios do Firestore apenas uma vez
+  // Carregar repertórios do Firestore com sincronização em tempo real
   useEffect(() => {
-    const loadInitialData = async () => {
-      try {
-        const unsubscribe = subscribeToCollection('repertoires', (data) => {
+    console.log('🔄 Configurando sincronização em tempo real para repertoires...');
+    try {
+      const unsubscribe = subscribeToCollection('repertoires', (data) => {
+        console.log('✅ Dados de repertoires atualizados:', data.length, 'documentos');
+        if (data.length === 0) {
+          console.log('⚠️ Collection repertoires vazia');
+        } else {
           setRepertoires(data as Repertoire[]);
-          unsubscribe();
-        });
-      } catch (error) {
-        console.error('Error loading repertoires:', error);
-      }
-    };
-    loadInitialData();
+        }
+      });
+      return () => {
+        console.log('❌ Cancelando sincronização de repertoires');
+        unsubscribe();
+      };
+    } catch (error) {
+      console.error('Error setting up repertoires sync:', error);
+    }
   }, []);
 
-  // Carregar atividades do Firestore apenas uma vez
+  // Carregar atividades do Firestore com sincronização em tempo real
   useEffect(() => {
-    const loadInitialData = async () => {
-      try {
-        const unsubscribe = subscribeToCollection('activities', (data) => {
-          setActivities(data as Activity[]);
-          unsubscribe();
-        }, 'timestamp');
-      } catch (error) {
-        console.error('Error loading activities:', error);
-      }
-    };
-    loadInitialData();
+    console.log('🔄 Configurando sincronização em tempo real para activities...');
+    try {
+      const unsubscribe = subscribeToCollection('activities', (data) => {
+        console.log('✅ Dados de activities atualizados:', data.length, 'documentos');
+        setActivities(data as Activity[]);
+      }, 'timestamp');
+      return () => {
+        console.log('❌ Cancelando sincronização de activities');
+        unsubscribe();
+      };
+    } catch (error) {
+      console.error('Error setting up activities sync:', error);
+    }
   }, []);
 
   // Funções para músicos
   const addMusician = async (musician: Musician) => {
-    // Atualizar estado local imediatamente
-    setMusicians(prev => [...prev, musician]);
-    
-    // Tentar salvar no Firestore em background
     try {
+      console.log('➕ Adicionando musician ao Firestore...');
       await addDocument('musicians', musician);
+      console.log('✅ Musician adicionado! onSnapshot vai atualizar');
       addActivity('musician', 'added', `${musician.name} adicionado como ${musician.instrument}`);
     } catch (error) {
-      console.error('Error adding musician to Firestore:', error);
-      // Dados já foram salvos no localStorage via useEffect
+      console.error('❌ Error adding musician to Firestore:', error);
     }
   };
 
   const updateMusician = async (id: string, updatedMusician: Musician) => {
-    // Atualizar estado local imediatamente
-    setMusicians(prev => prev.map(m => m.id === id ? { ...updatedMusician, id } : m));
-    
-    // Tentar salvar no Firestore em background
     try {
+      console.log('✏️ Atualizando musician no Firestore...');
       await updateDocument('musicians', id, updatedMusician);
+      console.log('✅ Musician atualizado! onSnapshot vai atualizar');
       addActivity('musician', 'updated', `Dados de ${updatedMusician.name} atualizados`);
     } catch (error) {
-      console.error('Error updating musician in Firestore:', error);
-      // Dados já foram salvos no localStorage via useEffect
+      console.error('❌ Error updating musician in Firestore:', error);
     }
   };
 
   const deleteMusician = async (id: string) => {
     const musician = musicians.find(m => m.id === id);
+    console.log('🗑️ Deletando musician:', id, musician?.name);
     
-    // Atualizar estado local imediatamente
-    setMusicians(prev => prev.filter(m => m.id !== id));
-    
-    // Tentar deletar do Firestore em background
     try {
+      console.log('🔥 Deletando do Firestore...');
       await deleteDocument('musicians', id);
+      console.log('✅ Deletado do Firestore! onSnapshot vai atualizar automaticamente');
       if (musician) {
         addActivity('musician', 'deleted', `${musician.name} removido do ministério`);
       }
     } catch (error) {
-      console.error('Error deleting musician from Firestore:', error);
-      // Dados já foram removidos do localStorage via useEffect
+      console.error('❌ Error deleting musician from Firestore:', error);
     }
   };
 
   // Funções para músicas
   const addSong = async (song: Song) => {
-    // Atualizar estado local imediatamente
-    setSongs(prev => [...prev, song]);
-    
-    // Tentar salvar no Firestore em background
     try {
+      console.log('➕ Adicionando song ao Firestore...');
       await addDocument('songs', song);
+      console.log('✅ Song adicionado! onSnapshot vai atualizar');
       addActivity('song', 'added', `"${song.title}" adicionada ao acervo`);
     } catch (error) {
-      console.error('Error adding song to Firestore:', error);
+      console.error('❌ Error adding song to Firestore:', error);
     }
   };
 
   const updateSong = async (id: string, updatedSong: Song) => {
-    // Atualizar estado local imediatamente
-    setSongs(prev => prev.map(s => s.id === id ? { ...updatedSong, id } : s));
-    
-    // Tentar salvar no Firestore em background
     try {
+      console.log('✏️ Atualizando song no Firestore...');
       await updateDocument('songs', id, updatedSong);
+      console.log('✅ Song atualizado! onSnapshot vai atualizar');
       addActivity('song', 'updated', `"${updatedSong.title}" atualizada`);
     } catch (error) {
-      console.error('Error updating song in Firestore:', error);
+      console.error('❌ Error updating song in Firestore:', error);
     }
   };
 
   const deleteSong = async (id: string) => {
     const song = songs.find(s => s.id === id);
+    console.log('🗑️ Deletando song:', id, song?.title);
     
-    // Atualizar estado local imediatamente
-    setSongs(prev => prev.filter(s => s.id !== id));
-    
-    // Tentar deletar do Firestore em background
     try {
+      console.log('🔥 Deletando do Firestore...');
       await deleteDocument('songs', id);
+      console.log('✅ Deletado do Firestore! onSnapshot vai atualizar automaticamente');
       if (song) {
         addActivity('song', 'deleted', `"${song.title}" removida do acervo`);
       }
     } catch (error) {
-      console.error('Error deleting song from Firestore:', error);
+      console.error('❌ Error deleting song from Firestore:', error);
     }
   };
 
@@ -369,40 +386,33 @@ export const AppProvider: React.FC<AppProviderProps> = ({ children }) => {
 
   // Funções para agenda
   const addAgendaItem = async (item: AgendaItem) => {
-    // Atualizar estado local imediatamente
-    setAgendaItems(prev => [...prev, item]);
-    
-    // Tentar salvar no Firestore em background
     try {
+      console.log('➕ Adicionando agenda item ao Firestore...');
       await addDocument('agendaItems', item);
+      console.log('✅ Agenda item adicionado! onSnapshot vai atualizar');
       addActivity('agenda', 'added', `Evento "${item.title}" adicionado à agenda`);
     } catch (error) {
-      console.error('Error adding agenda item to Firestore:', error);
+      console.error('❌ Error adding agenda item to Firestore:', error);
     }
   };
 
   const updateAgendaItem = async (id: string, updatedItem: AgendaItem) => {
-    // Atualizar estado local imediatamente
-    setAgendaItems(prev => prev.map(i => i.id === id ? { ...updatedItem, id } : i));
-    
-    // Tentar salvar no Firestore em background
     try {
+      console.log('✏️ Atualizando agenda item no Firestore...');
       await updateDocument('agendaItems', id, updatedItem);
+      console.log('✅ Agenda item atualizado! onSnapshot vai atualizar');
       addActivity('agenda', 'updated', `Evento "${updatedItem.title}" atualizado`);
     } catch (error) {
-      console.error('Error updating agenda item in Firestore:', error);
+      console.error('❌ Error updating agenda item in Firestore:', error);
     }
   };
 
   const deleteAgendaItem = async (id: string) => {
     const item = agendaItems.find(i => i.id === id);
     
-    // Atualizar estado local imediatamente
-    setAgendaItems(prev => prev.filter(i => i.id !== id));
-    
-    // Tentar deletar do Firestore em background
     try {
       await deleteDocument('agendaItems', id);
+      console.log('✅ AgendaItem deletado! onSnapshot vai atualizar');
       if (item) {
         addActivity('agenda', 'deleted', `Evento "${item.title}" removido da agenda`);
       }
@@ -413,40 +423,33 @@ export const AppProvider: React.FC<AppProviderProps> = ({ children }) => {
 
   // Funções para repertórios
   const addRepertoire = async (repertoire: Repertoire) => {
-    // Atualizar estado local imediatamente
-    setRepertoires(prev => [...prev, repertoire]);
-    
-    // Tentar salvar no Firestore em background
     try {
+      console.log('➕ Adicionando repertoire ao Firestore...');
       await addDocument('repertoires', repertoire);
+      console.log('✅ Repertoire adicionado! onSnapshot vai atualizar');
       addActivity('repertoire', 'added', `Repertório "${repertoire.title}" criado`);
     } catch (error) {
-      console.error('Error adding repertoire to Firestore:', error);
+      console.error('❌ Error adding repertoire to Firestore:', error);
     }
   };
 
   const updateRepertoire = async (id: string, updatedRepertoire: Repertoire) => {
-    // Atualizar estado local imediatamente
-    setRepertoires(prev => prev.map(r => r.id === id ? { ...updatedRepertoire, id } : r));
-    
-    // Tentar salvar no Firestore em background
     try {
+      console.log('✏️ Atualizando repertoire no Firestore...');
       await updateDocument('repertoires', id, updatedRepertoire);
+      console.log('✅ Repertoire atualizado! onSnapshot vai atualizar');
       addActivity('repertoire', 'updated', `Repertório "${updatedRepertoire.title}" atualizado`);
     } catch (error) {
-      console.error('Error updating repertoire in Firestore:', error);
+      console.error('❌ Error updating repertoire in Firestore:', error);
     }
   };
 
   const deleteRepertoire = async (id: string) => {
     const repertoire = repertoires.find(r => r.id === id);
     
-    // Atualizar estado local imediatamente
-    setRepertoires(prev => prev.filter(r => r.id !== id));
-    
-    // Tentar deletar do Firestore em background
     try {
       await deleteDocument('repertoires', id);
+      console.log('✅ Repertoire deletado! onSnapshot vai atualizar');
       if (repertoire) {
         addActivity('repertoire', 'deleted', `Repertório "${repertoire.title}" removido`);
       }

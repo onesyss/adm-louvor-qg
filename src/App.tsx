@@ -3,7 +3,6 @@ import { AppProvider } from './context/AppContext';
 import { NotificationProvider } from './components/Notification';
 import Layout from './components/Layout';
 import ProtectedRoute from './components/ProtectedRoute';
-import DebugAuth from './components/DebugAuth';
 import Home from './pages/Home';
 import Scales from './pages/Scales';
 import Agenda from './pages/Agenda';
@@ -20,7 +19,6 @@ function App() {
       <AppProvider>
         <Router>
           <div className="App">
-            <DebugAuth />
             <Routes>
               <Route path="/login" element={<Login />} />
               <Route path="/" element={<Layout />}>

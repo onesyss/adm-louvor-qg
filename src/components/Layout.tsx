@@ -1,7 +1,6 @@
 import React, { useState } from 'react';
 import { Outlet, Link, useLocation } from 'react-router-dom';
 import { 
-  Home, 
   Calendar, 
   Music, 
   Archive, 
@@ -16,7 +15,6 @@ const Layout: React.FC = () => {
   const location = useLocation();
 
   const navigation = [
-    { name: 'Início', href: '/', icon: Home },
     { name: 'Colaboradores', href: '/musicians', icon: Users },
     { name: 'Escalas', href: '/scales', icon: Calendar },
     { name: 'Agenda', href: '/agenda', icon: Calendar },
@@ -34,10 +32,10 @@ const Layout: React.FC = () => {
         <div className="mx-auto max-w-7xl px-4 sm:px-6">
           <div className="flex h-16 items-center justify-between">
             {/* Brand */}
-            <div className="flex items-center gap-2">
+            <Link to="/" className="flex items-center gap-2 hover:opacity-80 transition-opacity">
               <Music className="h-7 w-7 text-indigo-400" />
               <span className="text-lg font-semibold">QG WORSHIP</span>
-            </div>
+            </Link>
 
             {/* Desktop Nav */}
             <nav className="hidden md:flex items-center gap-1">

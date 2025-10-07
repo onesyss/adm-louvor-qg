@@ -201,21 +201,29 @@ const Musicians: React.FC = () => {
   };
 
   const handleDeleteMusician = async (id: string) => {
+    console.log('🔴 handleDeleteMusician chamado! ID:', id);
     const musician = musicians.find(m => m.id === id);
     const musicianName = musician?.name || 'este colaborador';
+    console.log('👤 Musician encontrado:', musicianName);
     
+    console.log('💬 Mostrando confirmação...');
     const confirmed = await showConfirm(
       'Excluir Colaborador',
       `Tem certeza que deseja excluir ${musicianName}? Esta ação não pode ser desfeita.`
     );
+    console.log('✅ Usuário confirmou:', confirmed);
 
     if (confirmed) {
-      deleteMusician(id);
+      console.log('🚀 Chamando deleteMusician...');
+      await deleteMusician(id);
+      console.log('✅ deleteMusician completou!');
       addNotification({
         type: 'success',
         title: 'Colaborador excluído!',
         message: `${musicianName} foi removido com sucesso.`
       });
+    } else {
+      console.log('❌ Usuário cancelou a exclusão');
     }
   };
 
@@ -328,7 +336,10 @@ const Musicians: React.FC = () => {
               <Edit className="h-4 w-4" />
             </button>
             <button
-              onClick={() => handleDeleteMusician(musician.id)}
+              onClick={() => {
+                console.log('🖱️ Botão Delete clicado! Musician ID:', musician.id);
+                handleDeleteMusician(musician.id);
+              }}
               className="p-2 text-zinc-400 hover:text-red-400 hover:bg-red-900/20 rounded-lg transition-colors"
               title="Excluir"
             >
