@@ -104,16 +104,43 @@ src/
 └── App.tsx        # Componente principal
 ```
 
-## 🚀 Deploy
+## 🚀 Deploy no Netlify
 
-Para fazer deploy em produção:
+### Configuração Rápida:
 
-1. Configure as variáveis de ambiente do Firebase
-2. Execute o build:
+1. **Conecte seu repositório no Netlify**
+   - Faça login em [netlify.com](https://netlify.com)
+   - Clique em "Add new site" → "Import an existing project"
+   - Conecte seu repositório Git
+
+2. **Configurações de Build** (já estão no `netlify.toml`):
+   - Build command: `npm run build`
+   - Publish directory: `dist`
+   - Node version: `20`
+
+3. **Variáveis de Ambiente** (Opcional - apenas se quiser separar prod/dev):
+   - Vá em Site settings → Environment variables
+   - Adicione (opcional, pois já tem valores hardcoded como fallback):
+     ```
+     VITE_FIREBASE_API_KEY = sua_api_key
+     VITE_FIREBASE_AUTH_DOMAIN = seu_auth_domain
+     VITE_FIREBASE_PROJECT_ID = seu_project_id
+     VITE_FIREBASE_STORAGE_BUCKET = seu_storage_bucket
+     VITE_FIREBASE_MESSAGING_SENDER_ID = seu_messaging_sender_id
+     VITE_FIREBASE_APP_ID = seu_app_id
+     ```
+
+4. **Deploy**
+   - Clique em "Deploy site"
+   - Aguarde o build completar
+   - Seu site estará no ar! 🎉
+
+### Deploy Manual (alternativa):
+
 ```bash
 npm run build
+npx netlify-cli deploy --prod
 ```
-3. Faça upload da pasta `dist` para seu servidor
 
 ## 🤝 Contribuição
 
