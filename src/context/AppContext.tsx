@@ -76,19 +76,24 @@ export const AppProvider: React.FC<AppProviderProps> = ({ children }) => {
   ];
 
   // Estado dos músicos
-  const [musicians, setMusicians] = useState<Musician[]>([]);
+  const [musicians, setMusicians] = useState<Musician[]>(initialMusicians);
 
-  // Carregar músicos do Firestore em tempo real
+  // Carregar músicos do Firestore apenas uma vez na inicialização
   useEffect(() => {
-    const unsubscribe = subscribeToCollection('musicians', (data) => {
-      // Se não tem dados no Firestore, usar dados iniciais
-      if (data.length === 0) {
-        setMusicians(initialMusicians);
-      } else {
-        setMusicians(data as Musician[]);
+    const loadInitialData = async () => {
+      try {
+        const unsubscribe = subscribeToCollection('musicians', (data) => {
+          if (data.length > 0) {
+            setMusicians(data as Musician[]);
+          }
+          // Desinscrever após a primeira carga
+          unsubscribe();
+        });
+      } catch (error) {
+        console.error('Error loading musicians:', error);
       }
-    });
-    return () => unsubscribe();
+    };
+    loadInitialData();
   }, []);
 
   // Dados iniciais das músicas
@@ -162,19 +167,24 @@ export const AppProvider: React.FC<AppProviderProps> = ({ children }) => {
   ];
 
   // Estado das músicas
-  const [songs, setSongs] = useState<Song[]>([]);
+  const [songs, setSongs] = useState<Song[]>(initialSongs);
 
-  // Carregar músicas do Firestore em tempo real
+  // Carregar músicas do Firestore apenas uma vez na inicialização
   useEffect(() => {
-    const unsubscribe = subscribeToCollection('songs', (data) => {
-      // Se não tem dados no Firestore, usar dados iniciais
-      if (data.length === 0) {
-        setSongs(initialSongs);
-      } else {
-        setSongs(data as Song[]);
+    const loadInitialData = async () => {
+      try {
+        const unsubscribe = subscribeToCollection('songs', (data) => {
+          if (data.length > 0) {
+            setSongs(data as Song[]);
+          }
+          // Desinscrever após a primeira carga
+          unsubscribe();
+        });
+      } catch (error) {
+        console.error('Error loading songs:', error);
       }
-    });
-    return () => unsubscribe();
+    };
+    loadInitialData();
   }, []);
 
   // Estado da agenda
@@ -189,36 +199,64 @@ export const AppProvider: React.FC<AppProviderProps> = ({ children }) => {
   // Estado das atividades
   const [activities, setActivities] = useState<Activity[]>([]);
 
-  // Carregar agenda do Firestore em tempo real
+  // Carregar agenda do Firestore apenas uma vez
   useEffect(() => {
-    const unsubscribe = subscribeToCollection('agendaItems', (data) => {
-      setAgendaItems(data as AgendaItem[]);
-    });
-    return () => unsubscribe();
+    const loadInitialData = async () => {
+      try {
+        const unsubscribe = subscribeToCollection('agendaItems', (data) => {
+          setAgendaItems(data as AgendaItem[]);
+          unsubscribe();
+        });
+      } catch (error) {
+        console.error('Error loading agenda:', error);
+      }
+    };
+    loadInitialData();
   }, []);
 
-  // Carregar escalas do Firestore em tempo real
+  // Carregar escalas do Firestore apenas uma vez
   useEffect(() => {
-    const unsubscribe = subscribeToCollection('schedules', (data) => {
-      setSchedules(data as MonthSchedule[]);
-    });
-    return () => unsubscribe();
+    const loadInitialData = async () => {
+      try {
+        const unsubscribe = subscribeToCollection('schedules', (data) => {
+          setSchedules(data as MonthSchedule[]);
+          unsubscribe();
+        });
+      } catch (error) {
+        console.error('Error loading schedules:', error);
+      }
+    };
+    loadInitialData();
   }, []);
 
-  // Carregar repertórios do Firestore em tempo real
+  // Carregar repertórios do Firestore apenas uma vez
   useEffect(() => {
-    const unsubscribe = subscribeToCollection('repertoires', (data) => {
-      setRepertoires(data as Repertoire[]);
-    });
-    return () => unsubscribe();
+    const loadInitialData = async () => {
+      try {
+        const unsubscribe = subscribeToCollection('repertoires', (data) => {
+          setRepertoires(data as Repertoire[]);
+          unsubscribe();
+        });
+      } catch (error) {
+        console.error('Error loading repertoires:', error);
+      }
+    };
+    loadInitialData();
   }, []);
 
-  // Carregar atividades do Firestore em tempo real
+  // Carregar atividades do Firestore apenas uma vez
   useEffect(() => {
-    const unsubscribe = subscribeToCollection('activities', (data) => {
-      setActivities(data as Activity[]);
-    }, 'timestamp');
-    return () => unsubscribe();
+    const loadInitialData = async () => {
+      try {
+        const unsubscribe = subscribeToCollection('activities', (data) => {
+          setActivities(data as Activity[]);
+          unsubscribe();
+        }, 'timestamp');
+      } catch (error) {
+        console.error('Error loading activities:', error);
+      }
+    };
+    loadInitialData();
   }, []);
 
   // Funções para músicos
