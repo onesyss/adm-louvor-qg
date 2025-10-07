@@ -12,22 +12,45 @@ const ProtectedRoute: React.FC<ProtectedRouteProps> = ({ children }) => {
   const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
-    // Verificar localStorage primeiro (fallback)
-    const localAuth = localStorage.getItem('isAuthenticated') === 'true';
-    
-    // Listener do estado de autenticação do Firebase
-    const unsubscribe = onAuthStateChanged(auth, (user) => {
-      // Se tem usuário no Firebase OU tem no localStorage, está autenticado
-      setIsAuthenticated(!!user || localAuth);
-      setIsLoading(false);
-    }, (error) => {
-      // Se erro no Firebase, usa localStorage como fallback
-      console.log('Firebase auth check failed, using localStorage fallback');
-      setIsAuthenticated(localAuth);
-      setIsLoading(false);
-    });
+    // Verificar localStorage primeiro (fallback imediato)
+    const checkAuth = () => {
+      const localAuth = localStorage.getItem('isAuthenticated') === 'true';
+      
+      // Se tem no localStorage, já considera autenticado e carrega
+      if (localAuth) {
+        setIsAuthenticated(true);
+        setIsLoading(false);
+      }
+      
+      // Listener do estado de autenticação do Firebase (em background)
+      const unsubscribe = onAuthStateChanged(auth, (user) => {
+        // Se tem usuário no Firebase, está autenticado
+        if (user) {
+          localStorage.setItem('isAuthenticated', 'true');
+          setIsAuthenticated(true);
+        } else if (!localAuth) {
+          // Só marca como não autenticado se também não tem no localStorage
+          setIsAuthenticated(false);
+        }
+        setIsLoading(false);
+      }, (error) => {
+        // Se erro no Firebase, mantém localStorage
+        console.log('Firebase auth check failed, using localStorage fallback');
+        if (localAuth) {
+          setIsAuthenticated(true);
+        } else {
+          setIsAuthenticated(false);
+        }
+        setIsLoading(false);
+      });
 
-    return () => unsubscribe();
+      return unsubscribe;
+    };
+
+    const unsubscribe = checkAuth();
+    return () => {
+      if (unsubscribe) unsubscribe();
+    };
   }, []);
 
   // Mostrar loading enquanto verifica autenticação

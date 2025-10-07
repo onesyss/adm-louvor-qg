@@ -50,6 +50,7 @@ const Admin: React.FC = () => {
   const handleLogout = async () => {
     try {
       await signOut(auth);
+      localStorage.removeItem('isAuthenticated');
       navigate('/login');
     } catch (error) {
       console.error('Error signing out:', error);
