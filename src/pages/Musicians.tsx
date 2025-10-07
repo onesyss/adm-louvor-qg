@@ -135,7 +135,6 @@ const Musicians: React.FC = () => {
 
   const handleCancelAdd = () => {
     setNewMusician({ name: '', instrument: 'Guitarra', photoUrl: '' });
-    setPhotoFile(null);
     setPhotoPreview('');
     setIsAddingMusician(false);
   };
@@ -500,7 +499,6 @@ const Musicians: React.FC = () => {
                     <button
                       type="button"
                       onClick={() => {
-                        setPhotoFile(null);
                         setPhotoPreview('');
                         setNewMusician({ ...newMusician, photoUrl: '' });
                       }}
