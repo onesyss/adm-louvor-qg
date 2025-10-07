@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { Archive, Search, Play, ExternalLink, Calendar, Music, Tag, Plus, Trash2, Save, Edit } from 'lucide-react';
 import { useAppContext } from '../context/AppContext';
 import { useNotification } from '../components/Notification';
+import { Song } from '../types';
 
 const ArchivePage: React.FC = () => {
   const { songs, addSong, updateSong, deleteSong } = useAppContext();
@@ -68,18 +69,6 @@ const ArchivePage: React.FC = () => {
     setCurrentPage(1);
   }, [searchTerm, selectedTag, sortBy]);
 
-  const getKeyColor = (key: string) => {
-    const colors: { [key: string]: string } = {
-      'C': 'bg-red-900/40 text-red-300 border-red-800',
-      'D': 'bg-orange-900/40 text-orange-300 border-orange-800',
-      'E': 'bg-yellow-900/40 text-yellow-300 border-yellow-800',
-      'F': 'bg-green-900/40 text-green-300 border-green-800',
-      'G': 'bg-blue-900/40 text-blue-300 border-blue-800',
-      'A': 'bg-indigo-900/40 text-indigo-300 border-indigo-800',
-      'B': 'bg-purple-900/40 text-purple-300 border-purple-800',
-    };
-    return colors[key] || 'bg-zinc-800 text-zinc-300 border-zinc-700';
-  };
 
   const handleAddSong = () => {
     if (newSong.title.trim() && newSong.artist.trim()) {
@@ -495,7 +484,6 @@ const ArchivePage: React.FC = () => {
                           width="100%"
                           height="200"
                           frameBorder="0"
-                          allowtransparency="true"
                           allow="encrypted-media"
                           className="rounded-lg"
                         ></iframe>

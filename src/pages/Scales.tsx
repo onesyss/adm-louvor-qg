@@ -37,19 +37,6 @@ const Scales: React.FC = () => {
     }
   };
 
-  const getWeekDates = (weekNumber: number) => {
-    const firstDay = new Date(currentYear, currentMonth, 1);
-    const startDate = new Date(firstDay);
-    startDate.setDate(1 + (weekNumber - 1) * 7);
-    
-    const endDate = new Date(startDate);
-    endDate.setDate(startDate.getDate() + 6);
-    
-    return {
-      start: startDate.toLocaleDateString('pt-BR', { day: '2-digit', month: '2-digit' }),
-      end: endDate.toLocaleDateString('pt-BR', { day: '2-digit', month: '2-digit' })
-    };
-  };
 
 
   const currentSchedule = getCurrentMonthSchedule();

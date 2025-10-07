@@ -4,7 +4,7 @@ import { Calendar, Music, Archive, ArrowRight, Clock, Users, Guitar, Plus, Edit,
 import { useAppContext } from '../context/AppContext';
 
 const Home: React.FC = () => {
-  const { musicians, songs, schedules, agendaItems, activities } = useAppContext();
+  const { musicians, songs, agendaItems, activities } = useAppContext();
   const currentDate = new Date();
   const currentMonth = currentDate.toLocaleDateString('pt-BR', { month: 'long', year: 'numeric' });
 

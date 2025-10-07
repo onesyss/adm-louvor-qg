@@ -81,9 +81,7 @@ export const AppProvider: React.FC<AppProviderProps> = ({ children }) => {
   // Carregar músicos do Firestore em tempo real
   useEffect(() => {
     const unsubscribe = subscribeToCollection('musicians', (data) => {
-      if (data.length > 0) {
-        setMusicians(data as Musician[]);
-      }
+      setMusicians(data as Musician[]);
     });
     return () => unsubscribe();
   }, []);
@@ -164,9 +162,7 @@ export const AppProvider: React.FC<AppProviderProps> = ({ children }) => {
   // Carregar músicas do Firestore em tempo real
   useEffect(() => {
     const unsubscribe = subscribeToCollection('songs', (data) => {
-      if (data.length > 0) {
-        setSongs(data as Song[]);
-      }
+      setSongs(data as Song[]);
     });
     return () => unsubscribe();
   }, []);
@@ -217,63 +213,92 @@ export const AppProvider: React.FC<AppProviderProps> = ({ children }) => {
 
   // Funções para músicos
   const addMusician = async (musician: Musician) => {
+    // Atualizar estado local imediatamente
+    setMusicians(prev => [...prev, musician]);
+    
+    // Tentar salvar no Firestore em background
     try {
       await addDocument('musicians', musician);
       addActivity('musician', 'added', `${musician.name} adicionado como ${musician.instrument}`);
     } catch (error) {
-      console.error('Error adding musician:', error);
+      console.error('Error adding musician to Firestore:', error);
+      // Dados já foram salvos no localStorage via useEffect
     }
   };
 
   const updateMusician = async (id: string, updatedMusician: Musician) => {
+    // Atualizar estado local imediatamente
+    setMusicians(prev => prev.map(m => m.id === id ? { ...updatedMusician, id } : m));
+    
+    // Tentar salvar no Firestore em background
     try {
       await updateDocument('musicians', id, updatedMusician);
       addActivity('musician', 'updated', `Dados de ${updatedMusician.name} atualizados`);
     } catch (error) {
-      console.error('Error updating musician:', error);
+      console.error('Error updating musician in Firestore:', error);
+      // Dados já foram salvos no localStorage via useEffect
     }
   };
 
   const deleteMusician = async (id: string) => {
     const musician = musicians.find(m => m.id === id);
+    
+    // Atualizar estado local imediatamente
+    setMusicians(prev => prev.filter(m => m.id !== id));
+    
+    // Tentar deletar do Firestore em background
     try {
       await deleteDocument('musicians', id);
       if (musician) {
         addActivity('musician', 'deleted', `${musician.name} removido do ministério`);
       }
     } catch (error) {
-      console.error('Error deleting musician:', error);
+      console.error('Error deleting musician from Firestore:', error);
+      // Dados já foram removidos do localStorage via useEffect
     }
   };
 
   // Funções para músicas
   const addSong = async (song: Song) => {
+    // Atualizar estado local imediatamente
+    setSongs(prev => [...prev, song]);
+    
+    // Tentar salvar no Firestore em background
     try {
       await addDocument('songs', song);
       addActivity('song', 'added', `"${song.title}" adicionada ao acervo`);
     } catch (error) {
-      console.error('Error adding song:', error);
+      console.error('Error adding song to Firestore:', error);
     }
   };
 
   const updateSong = async (id: string, updatedSong: Song) => {
+    // Atualizar estado local imediatamente
+    setSongs(prev => prev.map(s => s.id === id ? { ...updatedSong, id } : s));
+    
+    // Tentar salvar no Firestore em background
     try {
       await updateDocument('songs', id, updatedSong);
       addActivity('song', 'updated', `"${updatedSong.title}" atualizada`);
     } catch (error) {
-      console.error('Error updating song:', error);
+      console.error('Error updating song in Firestore:', error);
     }
   };
 
   const deleteSong = async (id: string) => {
     const song = songs.find(s => s.id === id);
+    
+    // Atualizar estado local imediatamente
+    setSongs(prev => prev.filter(s => s.id !== id));
+    
+    // Tentar deletar do Firestore em background
     try {
       await deleteDocument('songs', id);
       if (song) {
         addActivity('song', 'deleted', `"${song.title}" removida do acervo`);
       }
     } catch (error) {
-      console.error('Error deleting song:', error);
+      console.error('Error deleting song from Firestore:', error);
     }
   };
 
@@ -296,63 +321,89 @@ export const AppProvider: React.FC<AppProviderProps> = ({ children }) => {
 
   // Funções para agenda
   const addAgendaItem = async (item: AgendaItem) => {
+    // Atualizar estado local imediatamente
+    setAgendaItems(prev => [...prev, item]);
+    
+    // Tentar salvar no Firestore em background
     try {
       await addDocument('agendaItems', item);
       addActivity('agenda', 'added', `Evento "${item.title}" adicionado à agenda`);
     } catch (error) {
-      console.error('Error adding agenda item:', error);
+      console.error('Error adding agenda item to Firestore:', error);
     }
   };
 
   const updateAgendaItem = async (id: string, updatedItem: AgendaItem) => {
+    // Atualizar estado local imediatamente
+    setAgendaItems(prev => prev.map(i => i.id === id ? { ...updatedItem, id } : i));
+    
+    // Tentar salvar no Firestore em background
     try {
       await updateDocument('agendaItems', id, updatedItem);
       addActivity('agenda', 'updated', `Evento "${updatedItem.title}" atualizado`);
     } catch (error) {
-      console.error('Error updating agenda item:', error);
+      console.error('Error updating agenda item in Firestore:', error);
     }
   };
 
   const deleteAgendaItem = async (id: string) => {
     const item = agendaItems.find(i => i.id === id);
+    
+    // Atualizar estado local imediatamente
+    setAgendaItems(prev => prev.filter(i => i.id !== id));
+    
+    // Tentar deletar do Firestore em background
     try {
       await deleteDocument('agendaItems', id);
       if (item) {
         addActivity('agenda', 'deleted', `Evento "${item.title}" removido da agenda`);
       }
     } catch (error) {
-      console.error('Error deleting agenda item:', error);
+      console.error('Error deleting agenda item from Firestore:', error);
     }
   };
 
   // Funções para repertórios
   const addRepertoire = async (repertoire: Repertoire) => {
+    // Atualizar estado local imediatamente
+    setRepertoires(prev => [...prev, repertoire]);
+    
+    // Tentar salvar no Firestore em background
     try {
       await addDocument('repertoires', repertoire);
       addActivity('repertoire', 'added', `Repertório "${repertoire.title}" criado`);
     } catch (error) {
-      console.error('Error adding repertoire:', error);
+      console.error('Error adding repertoire to Firestore:', error);
     }
   };
 
   const updateRepertoire = async (id: string, updatedRepertoire: Repertoire) => {
+    // Atualizar estado local imediatamente
+    setRepertoires(prev => prev.map(r => r.id === id ? { ...updatedRepertoire, id } : r));
+    
+    // Tentar salvar no Firestore em background
     try {
       await updateDocument('repertoires', id, updatedRepertoire);
       addActivity('repertoire', 'updated', `Repertório "${updatedRepertoire.title}" atualizado`);
     } catch (error) {
-      console.error('Error updating repertoire:', error);
+      console.error('Error updating repertoire in Firestore:', error);
     }
   };
 
   const deleteRepertoire = async (id: string) => {
     const repertoire = repertoires.find(r => r.id === id);
+    
+    // Atualizar estado local imediatamente
+    setRepertoires(prev => prev.filter(r => r.id !== id));
+    
+    // Tentar deletar do Firestore em background
     try {
       await deleteDocument('repertoires', id);
       if (repertoire) {
         addActivity('repertoire', 'deleted', `Repertório "${repertoire.title}" removido`);
       }
     } catch (error) {
-      console.error('Error deleting repertoire:', error);
+      console.error('Error deleting repertoire from Firestore:', error);
     }
   };
 

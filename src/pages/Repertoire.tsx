@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Music, Play, ExternalLink, Calendar } from 'lucide-react';
+import { Music, Play, ExternalLink } from 'lucide-react';
 import { useAppContext } from '../context/AppContext';
 
 const RepertoirePage: React.FC = () => {

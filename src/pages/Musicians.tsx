@@ -14,7 +14,6 @@ const Musicians: React.FC = () => {
     instrument: 'Guitarra' as const,
     photoUrl: ''
   });
-  const [photoFile, setPhotoFile] = useState<File | null>(null);
   const [photoPreview, setPhotoPreview] = useState<string>('');
 
   // Estados para edição
@@ -24,7 +23,6 @@ const Musicians: React.FC = () => {
     instrument: 'Guitarra' as const,
     photoUrl: ''
   });
-  const [editPhotoFile, setEditPhotoFile] = useState<File | null>(null);
   const [editPhotoPreview, setEditPhotoPreview] = useState<string>('');
 
   // Estados para filtros
@@ -92,7 +90,6 @@ const Musicians: React.FC = () => {
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (file) {
-      setPhotoFile(file);
       const reader = new FileReader();
       reader.onload = (e) => {
         setPhotoPreview(e.target?.result as string);
@@ -105,8 +102,7 @@ const Musicians: React.FC = () => {
 
   const handleUrlChange = (url: string) => {
     setNewMusician({ ...newMusician, photoUrl: url });
-    // Limpar arquivo se URL foi inserida
-    setPhotoFile(null);
+    // Limpar preview se URL foi inserida
     setPhotoPreview('');
   };
 
@@ -120,7 +116,6 @@ const Musicians: React.FC = () => {
       };
       addMusician(musician);
       setNewMusician({ name: '', instrument: 'Guitarra', photoUrl: '' });
-      setPhotoFile(null);
       setPhotoPreview('');
       setIsAddingMusician(false);
       
@@ -149,7 +144,6 @@ const Musicians: React.FC = () => {
   const handleEditFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (file) {
-      setEditPhotoFile(file);
       const reader = new FileReader();
       reader.onload = (e) => {
         setEditPhotoPreview(e.target?.result as string);
@@ -161,7 +155,6 @@ const Musicians: React.FC = () => {
 
   const handleEditUrlChange = (url: string) => {
     setEditMusician({ ...editMusician, photoUrl: url });
-    setEditPhotoFile(null);
     setEditPhotoPreview('');
   };
 
@@ -172,7 +165,6 @@ const Musicians: React.FC = () => {
       instrument: musician.instrument,
       photoUrl: musician.photoUrl || ''
     });
-    setEditPhotoFile(null);
     setEditPhotoPreview('');
   };
 
@@ -206,26 +198,26 @@ const Musicians: React.FC = () => {
   const cancelEditMusician = () => {
     setEditingMusicianId(null);
     setEditMusician({ name: '', instrument: 'Guitarra', photoUrl: '' });
-    setEditPhotoFile(null);
     setEditPhotoPreview('');
   };
 
-  const handleDeleteMusician = (id: string) => {
+  const handleDeleteMusician = async (id: string) => {
     const musician = musicians.find(m => m.id === id);
     const musicianName = musician?.name || 'este colaborador';
     
-    showConfirm(
+    const confirmed = await showConfirm(
       'Excluir Colaborador',
-      `Tem certeza que deseja excluir ${musicianName}? Esta ação não pode ser desfeita.`,
-      () => {
-        deleteMusician(id);
-        addNotification({
-          type: 'success',
-          title: 'Colaborador excluído!',
-          message: `${musicianName} foi removido com sucesso.`
-        });
-      }
+      `Tem certeza que deseja excluir ${musicianName}? Esta ação não pode ser desfeita.`
     );
+
+    if (confirmed) {
+      deleteMusician(id);
+      addNotification({
+        type: 'success',
+        title: 'Colaborador excluído!',
+        message: `${musicianName} foi removido com sucesso.`
+      });
+    }
   };
 
   // Componente para renderizar card de colaborador
@@ -282,7 +274,6 @@ const Musicians: React.FC = () => {
                   <button
                     type="button"
                     onClick={() => {
-                      setEditPhotoFile(null);
                       setEditPhotoPreview('');
                       setEditMusician({ ...editMusician, photoUrl: '' });
                     }}

@@ -8,7 +8,6 @@ import {
   Settings,
   Menu,
   X,
-  User,
   Users
 } from 'lucide-react';
 

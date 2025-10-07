@@ -33,7 +33,7 @@ const ProtectedRoute: React.FC<ProtectedRouteProps> = ({ children }) => {
           setIsAuthenticated(false);
         }
         setIsLoading(false);
-      }, (error) => {
+      }, () => {
         // Se erro no Firebase, mantém localStorage
         console.log('Firebase auth check failed, using localStorage fallback');
         if (localAuth) {
