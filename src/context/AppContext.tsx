@@ -76,12 +76,17 @@ export const AppProvider: React.FC<AppProviderProps> = ({ children }) => {
   ];
 
   // Estado dos músicos
-  const [musicians, setMusicians] = useState<Musician[]>(initialMusicians);
+  const [musicians, setMusicians] = useState<Musician[]>([]);
 
   // Carregar músicos do Firestore em tempo real
   useEffect(() => {
     const unsubscribe = subscribeToCollection('musicians', (data) => {
-      setMusicians(data as Musician[]);
+      // Se não tem dados no Firestore, usar dados iniciais
+      if (data.length === 0) {
+        setMusicians(initialMusicians);
+      } else {
+        setMusicians(data as Musician[]);
+      }
     });
     return () => unsubscribe();
   }, []);
@@ -157,12 +162,17 @@ export const AppProvider: React.FC<AppProviderProps> = ({ children }) => {
   ];
 
   // Estado das músicas
-  const [songs, setSongs] = useState<Song[]>(initialSongs);
+  const [songs, setSongs] = useState<Song[]>([]);
 
   // Carregar músicas do Firestore em tempo real
   useEffect(() => {
     const unsubscribe = subscribeToCollection('songs', (data) => {
-      setSongs(data as Song[]);
+      // Se não tem dados no Firestore, usar dados iniciais
+      if (data.length === 0) {
+        setSongs(initialSongs);
+      } else {
+        setSongs(data as Song[]);
+      }
     });
     return () => unsubscribe();
   }, []);
