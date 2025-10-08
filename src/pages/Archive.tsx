@@ -70,7 +70,10 @@ const ArchivePage: React.FC = () => {
   }, [searchTerm, selectedTag, sortBy]);
 
 
-  const handleAddSong = () => {
+  const handleAddSong = async () => {
+    console.log('🎵 handleAddSong chamado!');
+    console.log('📝 Dados do form:', newSong);
+    
     if (newSong.title.trim() && newSong.artist.trim()) {
       const song = {
         id: Date.now().toString(),
@@ -83,7 +86,10 @@ const ArchivePage: React.FC = () => {
         tags: newSong.style ? [newSong.style] : undefined,
         lyrics: newSong.lyrics || undefined
       };
-      addSong(song);
+      console.log('🎵 Song object criado:', song);
+      console.log('🚀 Chamando addSong...');
+      await addSong(song);
+      console.log('✅ addSong completou!');
       setNewSong({
         title: '',
         artist: '',

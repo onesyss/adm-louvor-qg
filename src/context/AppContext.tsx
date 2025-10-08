@@ -76,12 +76,11 @@ export const AppProvider: React.FC<AppProviderProps> = ({ children }) => {
   ];
 
   // Estado dos músicos
-  const [musicians, setMusicians] = useState<Musician[]>(initialMusicians);
+  const [musicians, setMusicians] = useState<Musician[]>([]);
 
   // Carregar músicos do Firestore com sincronização em tempo real
   useEffect(() => {
     console.log('🔄 Configurando sincronização em tempo real para musicians...');
-    console.log('📍 Estado atual de musicians:', musicians.length);
     
     let unsubscribe: (() => void) | null = null;
     
@@ -177,7 +176,7 @@ export const AppProvider: React.FC<AppProviderProps> = ({ children }) => {
   ];
 
   // Estado das músicas
-  const [songs, setSongs] = useState<Song[]>(initialSongs);
+  const [songs, setSongs] = useState<Song[]>([]);
 
   // Carregar músicas do Firestore com sincronização em tempo real
   useEffect(() => {
@@ -185,12 +184,7 @@ export const AppProvider: React.FC<AppProviderProps> = ({ children }) => {
     try {
       const unsubscribe = subscribeToCollection('songs', (data) => {
         console.log('✅ Dados de songs atualizados:', data.length, 'documentos');
-        // Se não tem dados no Firestore, manter dados iniciais
-        if (data.length === 0) {
-          console.log('⚠️ Collection songs vazia, mantendo dados iniciais');
-        } else {
-          setSongs(data as Song[]);
-        }
+        setSongs(data as Song[]);
       });
       return () => {
         console.log('❌ Cancelando sincronização de songs');
@@ -236,11 +230,9 @@ export const AppProvider: React.FC<AppProviderProps> = ({ children }) => {
     try {
       const unsubscribe = subscribeToCollection('schedules', (data) => {
         console.log('✅ Dados de schedules atualizados:', data.length, 'documentos');
-        if (data.length === 0) {
-          console.log('⚠️ Collection schedules vazia');
-        } else {
-          setSchedules(data as MonthSchedule[]);
-        }
+        console.log('📊 Schedules recebidos:', data);
+        setSchedules(data as MonthSchedule[]);
+        console.log('✅ Estado de schedules atualizado!');
       });
       return () => {
         console.log('❌ Cancelando sincronização de schedules');
@@ -257,11 +249,8 @@ export const AppProvider: React.FC<AppProviderProps> = ({ children }) => {
     try {
       const unsubscribe = subscribeToCollection('repertoires', (data) => {
         console.log('✅ Dados de repertoires atualizados:', data.length, 'documentos');
-        if (data.length === 0) {
-          console.log('⚠️ Collection repertoires vazia');
-        } else {
-          setRepertoires(data as Repertoire[]);
-        }
+        setRepertoires(data as Repertoire[]);
+        console.log('✅ Estado de repertoires atualizado!');
       });
       return () => {
         console.log('❌ Cancelando sincronização de repertoires');
@@ -425,6 +414,10 @@ export const AppProvider: React.FC<AppProviderProps> = ({ children }) => {
   const addRepertoire = async (repertoire: Repertoire) => {
     try {
       console.log('➕ Adicionando repertoire ao Firestore...');
+      console.log('📋 Repertoire recebido:', repertoire);
+      console.log('📝 Título:', repertoire.title);
+      console.log('📅 Data:', repertoire.weekDate);
+      console.log('🎵 Músicas:', repertoire.songs);
       await addDocument('repertoires', repertoire);
       console.log('✅ Repertoire adicionado! onSnapshot vai atualizar');
       addActivity('repertoire', 'added', `Repertório "${repertoire.title}" criado`);

@@ -15,6 +15,9 @@ import {
 import { AgendaItem, MonthSchedule, WeekSchedule } from '../types';
 import { useAppContext } from '../context/AppContext';
 import { useNotification } from '../components/Notification';
+import MigrationButton from '../components/MigrationButton';
+import CreateCollectionsButton from '../components/CreateCollectionsButton';
+import { addDocument, updateDocument, deleteDocument } from '../firebase/firestore';
 import { signOut } from 'firebase/auth';
 import { auth } from '../firebase/config';
 
@@ -32,6 +35,8 @@ const Admin: React.FC = () => {
     selectedMusicians: [] as string[],
     date: ''
   });
+  const [showCustomServiceName, setShowCustomServiceName] = useState(false);
+  const [customServiceName, setCustomServiceName] = useState('');
 
   // Estado para edição
   const [editingWeek, setEditingWeek] = useState<string | null>(null);
@@ -43,14 +48,16 @@ const Admin: React.FC = () => {
     selectedMusicians: [] as string[],
     date: ''
   });
+  const [showEditCustomServiceName, setShowEditCustomServiceName] = useState(false);
+  const [editCustomServiceName, setEditCustomServiceName] = useState('');
   
   const navigate = useNavigate();
 
   const handleLogout = async () => {
     try {
       await signOut(auth);
-      localStorage.removeItem('isAuthenticated');
-      navigate('/login');
+    localStorage.removeItem('isAuthenticated');
+    navigate('/login');
     } catch (error) {
       console.error('Error signing out:', error);
     }
@@ -58,7 +65,7 @@ const Admin: React.FC = () => {
 
   // Estados para agenda
   const [newAgendaItem, setNewAgendaItem] = useState({
-    title: '',
+    title: '', 
     description: '',
     date: '',
     time: '',
@@ -86,25 +93,25 @@ const Admin: React.FC = () => {
       return;
     }
 
-    const item: AgendaItem = {
-      id: Date.now().toString(),
-      title: newAgendaItem.title,
-      description: newAgendaItem.description,
-      date: newAgendaItem.date,
-      time: newAgendaItem.time || undefined,
-      location: newAgendaItem.location || undefined,
-      type: newAgendaItem.type
-    };
+      const item: AgendaItem = {
+        id: Date.now().toString(),
+        title: newAgendaItem.title,
+        description: newAgendaItem.description,
+        date: newAgendaItem.date,
+        time: newAgendaItem.time || undefined,
+        location: newAgendaItem.location || undefined,
+        type: newAgendaItem.type
+      };
     
     addAgendaItemContext(item);
-    setNewAgendaItem({
-      title: '',
-      description: '',
-      date: '',
-      time: '',
-      location: '',
-      type: 'rehearsal'
-    });
+      setNewAgendaItem({
+        title: '',
+        description: '',
+        date: '',
+        time: '',
+        location: '',
+        type: 'rehearsal'
+      });
 
     addNotification({
       type: 'success',
@@ -214,7 +221,7 @@ const Admin: React.FC = () => {
     }));
   };
 
-  const saveScale = () => {
+  const saveScale = async () => {
     if (newScale.selectedMusicians.length === 0) {
       addNotification({
         type: 'warning',
@@ -235,37 +242,51 @@ const Admin: React.FC = () => {
       vocals: [] // Por enquanto vazio, pode ser implementado depois
     };
 
-    setSchedules((prev: MonthSchedule[]) => {
-      const existingSchedule = prev.find((s: MonthSchedule) => s.month === newScale.month && s.year === newScale.year);
-      if (existingSchedule) {
-        // Verificar se já existe uma escala para esta semana E tipo de culto
-        const existingWeek = existingSchedule.weeks.find((w: WeekSchedule) => 
-          w.weekNumber === newScale.weekNumber && w.serviceName === newScale.serviceName
-        );
-        if (existingWeek) {
-          addNotification({
-            type: 'warning',
-            title: 'Escala já cadastrada',
-            message: `Já existe uma escala para ${newScale.serviceName} na ${newScale.weekNumber}ª semana deste mês.`
-          });
-          return prev;
-        }
-        
-        return prev.map((schedule: MonthSchedule) => 
-          schedule.id === existingSchedule.id
-            ? { ...schedule, weeks: [...schedule.weeks, newWeek] }
-            : schedule
-        );
-      } else {
-        const newSchedule: MonthSchedule = {
-          id: `${newScale.month}-${newScale.year}`,
-          month: newScale.month,
-          year: newScale.year,
-          weeks: [newWeek]
-        };
-        return [...prev, newSchedule];
+    const scheduleId = `${newScale.month}-${newScale.year}`;
+    const existingSchedule = schedules.find((s: MonthSchedule) => s.month === newScale.month && s.year === newScale.year);
+    
+    if (existingSchedule) {
+      // Verificar se já existe uma escala para esta semana E tipo de culto
+      const existingWeek = existingSchedule.weeks.find((w: WeekSchedule) => 
+        w.weekNumber === newScale.weekNumber && w.serviceName === newScale.serviceName
+      );
+      if (existingWeek) {
+        addNotification({
+          type: 'warning',
+          title: 'Escala já cadastrada',
+          message: `Já existe uma escala para ${newScale.serviceName} na ${newScale.weekNumber}ª semana deste mês.`
+        });
+        return;
       }
-    });
+      
+      // Atualizar schedule existente
+      const updatedSchedule = {
+        ...existingSchedule,
+        weeks: [...existingSchedule.weeks, newWeek]
+      };
+      
+      try {
+        await updateDocument('schedules', scheduleId, updatedSchedule);
+        console.log('✅ Schedule atualizado no Firestore');
+      } catch (error) {
+        console.error('❌ Erro ao atualizar schedule:', error);
+      }
+    } else {
+      // Criar novo schedule
+      const newSchedule: MonthSchedule = {
+        id: scheduleId,
+        month: newScale.month,
+        year: newScale.year,
+        weeks: [newWeek]
+      };
+      
+      try {
+        await addDocument('schedules', newSchedule);
+        console.log('✅ Schedule criado no Firestore');
+      } catch (error) {
+        console.error('❌ Erro ao criar schedule:', error);
+      }
+    }
 
     // Resetar formulário
     setNewScale({
@@ -276,6 +297,8 @@ const Admin: React.FC = () => {
       selectedMusicians: [],
       date: ''
     });
+    setShowCustomServiceName(false);
+    setCustomServiceName('');
 
     addNotification({
       type: 'success',
@@ -293,6 +316,11 @@ const Admin: React.FC = () => {
       const schedule = schedules.find(s => s.weeks.some(w => w.id === weekId));
       if (schedule) {
         setEditingWeek(weekId);
+        
+        // Verificar se é um tipo customizado
+        const predefinedTypes = ['Culto Manhã', 'Culto Noite', 'Culto de Terça', ''];
+        const isCustom = week.serviceName && !predefinedTypes.includes(week.serviceName);
+        
         setEditScale({
           month: schedule.month,
           year: schedule.year,
@@ -301,11 +329,19 @@ const Admin: React.FC = () => {
           selectedMusicians: week.musicians.map(m => m.id),
           date: week.date
         });
+        
+        if (isCustom) {
+          setShowEditCustomServiceName(true);
+          setEditCustomServiceName(week.serviceName || '');
+        } else {
+          setShowEditCustomServiceName(false);
+          setEditCustomServiceName('');
+        }
       }
     }
   };
 
-  const saveEditWeek = () => {
+  const saveEditWeek = async () => {
     if (!editingWeek) return;
 
     if (editScale.selectedMusicians.length === 0) {
@@ -319,22 +355,35 @@ const Admin: React.FC = () => {
 
     const selectedMusiciansData = musicians.filter(m => editScale.selectedMusicians.includes(m.id));
     
-    setSchedules((prev: MonthSchedule[]) => 
-      prev.map((schedule: MonthSchedule) => ({
-        ...schedule,
-        weeks: schedule.weeks.map((week: WeekSchedule) => 
-            week.id === editingWeek
-              ? {
-                  ...week,
-                  weekNumber: editScale.weekNumber,
-                  date: editScale.date || week.date,
-                  serviceName: editScale.serviceName || undefined,
-                  musicians: selectedMusiciansData
-                }
-              : week
-        )
-      }))
+    // Encontrar o schedule que contém esta week
+    const scheduleWithWeek = schedules.find((s: MonthSchedule) => 
+      s.weeks.some((w: WeekSchedule) => w.id === editingWeek)
     );
+    
+    if (scheduleWithWeek) {
+      // Atualizar a week específica
+      const updatedSchedule = {
+        ...scheduleWithWeek,
+        weeks: scheduleWithWeek.weeks.map((week: WeekSchedule) => 
+          week.id === editingWeek
+            ? {
+                ...week,
+                weekNumber: editScale.weekNumber,
+                date: editScale.date || week.date,
+                serviceName: editScale.serviceName || undefined,
+                musicians: selectedMusiciansData
+              }
+            : week
+        )
+      };
+      
+      try {
+        await updateDocument('schedules', scheduleWithWeek.id, updatedSchedule);
+        console.log('✅ Schedule editado no Firestore');
+      } catch (error) {
+        console.error('❌ Erro ao editar schedule:', error);
+      }
+    }
 
     setEditingWeek(null);
     addNotification({
@@ -354,6 +403,8 @@ const Admin: React.FC = () => {
       selectedMusicians: [],
       date: ''
     });
+    setShowEditCustomServiceName(false);
+    setEditCustomServiceName('');
   };
 
   const moveWeekUp = (weekId: string) => {
@@ -401,13 +452,40 @@ const Admin: React.FC = () => {
     );
     
     if (confirmed) {
-      setSchedules((prev: MonthSchedule[]) => {
-        const updated = prev.map((schedule: MonthSchedule) => ({
-          ...schedule,
-          weeks: schedule.weeks.filter((week: WeekSchedule) => week.id !== weekId)
-        })).filter((schedule: MonthSchedule) => schedule.weeks.length > 0); // Remove schedules vazios
-        return updated;
-      });
+      console.log('🗑️ Deletando escala:', weekId);
+      
+      // Encontrar o schedule que contém esta week
+      const scheduleWithWeek = schedules.find((s: MonthSchedule) => 
+        s.weeks.some((w: WeekSchedule) => w.id === weekId)
+      );
+      
+      if (scheduleWithWeek) {
+        const updatedWeeks = scheduleWithWeek.weeks.filter((w: WeekSchedule) => w.id !== weekId);
+        
+        if (updatedWeeks.length === 0) {
+          // Se não sobrou nenhuma semana, deletar o schedule inteiro
+          try {
+            await deleteDocument('schedules', scheduleWithWeek.id);
+            console.log('✅ Schedule deletado do Firestore (estava vazio)');
+          } catch (error) {
+            console.error('❌ Erro ao deletar schedule:', error);
+          }
+        } else {
+          // Atualizar o schedule com as semanas restantes
+          const updatedSchedule = {
+            ...scheduleWithWeek,
+            weeks: updatedWeeks
+          };
+          
+          try {
+            await updateDocument('schedules', scheduleWithWeek.id, updatedSchedule);
+            console.log('✅ Schedule atualizado no Firestore (week removida)');
+          } catch (error) {
+            console.error('❌ Erro ao atualizar schedule:', error);
+          }
+        }
+      }
+      
       addNotification({
         type: 'success',
         title: 'Escala excluída!',
@@ -571,7 +649,10 @@ const Admin: React.FC = () => {
     });
   };
 
-  const handleAddRepertoire = () => {
+  const handleAddRepertoire = async () => {
+    console.log('🎼 handleAddRepertoire chamado!');
+    console.log('📝 newRepertoire:', newRepertoire);
+    
     if (!newRepertoire.title.trim() || !newRepertoire.weekDate || newRepertoire.repertoireSongs.length === 0) {
       addNotification({
         type: 'warning',
@@ -591,7 +672,11 @@ const Admin: React.FC = () => {
       songs: newRepertoire.repertoireSongs
     };
 
-    addRepertoireContext(repertoire);
+    console.log('🎼 Repertoire criado:', repertoire);
+    console.log('🚀 Chamando addRepertoireContext...');
+    await addRepertoireContext(repertoire);
+    console.log('✅ addRepertoireContext completou!');
+    
     setNewRepertoire({
       title: '',
       weekDate: '',
@@ -616,7 +701,11 @@ const Admin: React.FC = () => {
     });
   };
 
-  const saveEditRepertoire = () => {
+  const saveEditRepertoire = async () => {
+    console.log('✏️ saveEditRepertoire chamado!');
+    console.log('📝 editingRepertoireId:', editingRepertoireId);
+    console.log('📝 editRepertoire:', editRepertoire);
+    
     if (!editRepertoire.title.trim() || !editRepertoire.weekDate || editRepertoire.repertoireSongs.length === 0) {
       addNotification({
         type: 'warning',
@@ -636,7 +725,10 @@ const Admin: React.FC = () => {
       songs: editRepertoire.repertoireSongs
     };
 
-    updateRepertoire(editingRepertoireId!, updatedRepertoire);
+    console.log('🚀 Chamando updateRepertoire...');
+    await updateRepertoire(editingRepertoireId!, updatedRepertoire);
+    console.log('✅ updateRepertoire completou!');
+    
     setEditingRepertoireId(null);
 
     addNotification({
@@ -878,8 +970,8 @@ const Admin: React.FC = () => {
               <h3 className="text-base md:text-lg font-semibold text-zinc-100 mb-4">Novo Evento</h3>
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6 mb-4">
                 <div className="space-y-4">
-                  <input
-                    type="text"
+                <input
+                  type="text"
                     placeholder="Título do evento"
                     value={newAgendaItem.title}
                     onChange={(e) => setNewAgendaItem({ ...newAgendaItem, title: e.target.value })}
@@ -912,8 +1004,8 @@ const Admin: React.FC = () => {
                     value={newAgendaItem.time}
                     onChange={(e) => setNewAgendaItem({ ...newAgendaItem, time: e.target.value })}
                     className="w-full px-3 py-2 bg-zinc-900 border border-zinc-600 text-zinc-100 placeholder-zinc-500 rounded-lg focus:ring-2 focus:ring-indigo-500"
-                  />
-                  <select
+                />
+                <select
                     value={newAgendaItem.type}
                     onChange={(e) => setNewAgendaItem({ ...newAgendaItem, type: e.target.value as AgendaItem['type'] })}
                     className="w-full px-3 py-2 bg-zinc-900 border border-zinc-600 text-zinc-100 placeholder-zinc-500 rounded-lg focus:ring-2 focus:ring-indigo-500"
@@ -922,18 +1014,18 @@ const Admin: React.FC = () => {
                     <option value="service">Culto</option>
                     <option value="event">Evento</option>
                     <option value="meeting">Reunião</option>
-                  </select>
+                </select>
                 </div>
               </div>
 
               <button onClick={handleAddAgendaItem} className="btn-primary">
-                <Plus className="h-4 w-4 mr-2" />
+                  <Plus className="h-4 w-4 mr-2" />
                 Adicionar Evento
-              </button>
+                </button>
             </div>
 
             {/* Lista de Eventos */}
-            <div>
+                    <div>
               <h3 className="text-base md:text-lg font-semibold text-zinc-100 mb-4">Eventos Cadastrados</h3>
               <div className="space-y-4">
                 {agendaItems.length > 0 ? (
@@ -1020,11 +1112,11 @@ const Admin: React.FC = () => {
                                 {item.type === 'rehearsal' ? 'Ensaio' :
                                  item.type === 'service' ? 'Culto' :
                                  item.type === 'event' ? 'Evento' : 'Reunião'}
-                              </span>
-                            </div>
+                      </span>
+                    </div>
                           </div>
                           <div className="flex items-center space-x-2">
-                            <button
+                    <button
                               onClick={() => startEditAgenda(item)}
                               className="p-2 text-blue-400 hover:bg-blue-900/20 rounded-lg transition-colors"
                             >
@@ -1033,11 +1125,11 @@ const Admin: React.FC = () => {
                             <button
                               onClick={() => handleDeleteAgenda(item.id)}
                               className="p-2 text-red-400 hover:bg-red-900/20 rounded-lg transition-colors"
-                            >
-                              <Trash2 className="h-4 w-4" />
-                            </button>
-                          </div>
-                        </div>
+                    >
+                      <Trash2 className="h-4 w-4" />
+                    </button>
+                  </div>
+                </div>
                       )}
                     </div>
                   ))
@@ -1055,9 +1147,9 @@ const Admin: React.FC = () => {
         {/* Scales Tab */}
         {activeTab === 'scales' && (
           <div>
-                <div className="flex items-center justify-between mb-6">
+            <div className="flex items-center justify-between mb-6">
                   <h2 className="text-xl md:text-2xl font-bold text-zinc-100">Gerenciar Escalas</h2>
-                </div>
+            </div>
 
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6 mb-6">
               <div className="space-y-4">
@@ -1080,9 +1172,18 @@ const Admin: React.FC = () => {
                   onChange={(e) => setNewScale(prev => ({ ...prev, date: e.target.value }))}
                   className="w-full px-3 py-2 bg-zinc-800 border border-zinc-700 text-zinc-100 placeholder-zinc-500 rounded-lg focus:ring-2 focus:ring-indigo-500"
                 />
-                      <select
-                        value={newScale.serviceName}
-                        onChange={(e) => setNewScale(prev => ({ ...prev, serviceName: e.target.value }))}
+                      <select 
+                        value={showCustomServiceName ? 'Outro' : newScale.serviceName}
+                        onChange={(e) => {
+                          if (e.target.value === 'Outro') {
+                            setShowCustomServiceName(true);
+                            setCustomServiceName('');
+                            setNewScale(prev => ({ ...prev, serviceName: '' }));
+                          } else {
+                            setShowCustomServiceName(false);
+                            setNewScale(prev => ({ ...prev, serviceName: e.target.value }));
+                          }
+                        }}
                         className="w-full px-3 py-2 bg-zinc-800 border border-zinc-700 text-zinc-100 placeholder-zinc-500 rounded-lg focus:ring-2 focus:ring-indigo-500"
                       >
                         <option value="">Selecione o tipo de culto</option>
@@ -1091,13 +1192,17 @@ const Admin: React.FC = () => {
                         <option value="Culto de Terça">Culto de Terça</option>
                         <option value="Outro">Outro (especificar)</option>
                       </select>
-                      {newScale.serviceName === 'Outro' && (
+                      {showCustomServiceName && (
                         <input
                           type="text"
                           placeholder="Especifique o tipo de culto"
-                          value={newScale.serviceName === 'Outro' ? '' : newScale.serviceName}
-                          onChange={(e) => setNewScale(prev => ({ ...prev, serviceName: e.target.value }))}
+                          value={customServiceName}
+                          onChange={(e) => {
+                            setCustomServiceName(e.target.value);
+                            setNewScale(prev => ({ ...prev, serviceName: e.target.value }));
+                          }}
                           className="w-full px-3 py-2 bg-zinc-800 border border-zinc-700 text-zinc-100 placeholder-zinc-500 rounded-lg focus:ring-2 focus:ring-indigo-500 mt-2"
+                          autoFocus
                         />
                       )}
                 <select 
@@ -1125,7 +1230,7 @@ const Admin: React.FC = () => {
                           <div className="space-y-2">
                             {musicians.filter(m => m.instrument !== 'Vocal' && m.instrument !== 'Técnico de Som').map((musician) => (
                               <label key={musician.id} className="flex items-center">
-                                <input 
+                <input
                                   type="checkbox" 
                                   checked={newScale.selectedMusicians.includes(musician.id)}
                                   onChange={() => handleMusicianToggle(musician.id)}
@@ -1143,7 +1248,7 @@ const Admin: React.FC = () => {
                           <div className="space-y-2">
                             {musicians.filter(m => m.instrument === 'Vocal').map((musician) => (
                               <label key={musician.id} className="flex items-center">
-                                <input 
+                <input
                                   type="checkbox" 
                                   checked={newScale.selectedMusicians.includes(musician.id)}
                                   onChange={() => handleMusicianToggle(musician.id)}
@@ -1161,7 +1266,7 @@ const Admin: React.FC = () => {
                           <div className="space-y-2">
                             {musicians.filter(m => m.instrument === 'Técnico de Som').map((musician) => (
                               <label key={musician.id} className="flex items-center">
-                                <input 
+                <input
                                   type="checkbox" 
                                   checked={newScale.selectedMusicians.includes(musician.id)}
                                   onChange={() => handleMusicianToggle(musician.id)}
@@ -1214,9 +1319,18 @@ const Admin: React.FC = () => {
                       onChange={(e) => setEditScale(prev => ({ ...prev, date: e.target.value }))}
                       className="w-full px-3 py-2 bg-zinc-800 border border-zinc-700 text-zinc-100 placeholder-zinc-500 rounded-lg focus:ring-2 focus:ring-indigo-500"
                     />
-                    <select
-                      value={editScale.serviceName}
-                      onChange={(e) => setEditScale(prev => ({ ...prev, serviceName: e.target.value }))}
+                    <select 
+                      value={showEditCustomServiceName ? 'Outro' : editScale.serviceName}
+                      onChange={(e) => {
+                        if (e.target.value === 'Outro') {
+                          setShowEditCustomServiceName(true);
+                          setEditCustomServiceName('');
+                          setEditScale(prev => ({ ...prev, serviceName: '' }));
+                        } else {
+                          setShowEditCustomServiceName(false);
+                          setEditScale(prev => ({ ...prev, serviceName: e.target.value }));
+                        }
+                      }}
                       className="w-full px-3 py-2 bg-zinc-800 border border-zinc-700 text-zinc-100 placeholder-zinc-500 rounded-lg focus:ring-2 focus:ring-indigo-500"
                     >
                       <option value="">Selecione o tipo de culto</option>
@@ -1225,13 +1339,17 @@ const Admin: React.FC = () => {
                       <option value="Culto de Terça">Culto de Terça</option>
                       <option value="Outro">Outro (especificar)</option>
                     </select>
-                    {editScale.serviceName === 'Outro' && (
+                    {showEditCustomServiceName && (
                       <input
                         type="text"
                         placeholder="Especifique o tipo de culto"
-                        value={editScale.serviceName === 'Outro' ? '' : editScale.serviceName}
-                        onChange={(e) => setEditScale(prev => ({ ...prev, serviceName: e.target.value }))}
+                        value={editCustomServiceName}
+                        onChange={(e) => {
+                          setEditCustomServiceName(e.target.value);
+                          setEditScale(prev => ({ ...prev, serviceName: e.target.value }));
+                        }}
                         className="w-full px-3 py-2 bg-zinc-800 border border-zinc-700 text-zinc-100 placeholder-zinc-500 rounded-lg focus:ring-2 focus:ring-indigo-500 mt-2"
+                        autoFocus
                       />
                     )}
                     <select 
@@ -1244,7 +1362,7 @@ const Admin: React.FC = () => {
                       <option value="3">Semana 3</option>
                       <option value="4">Semana 4</option>
                     </select>
-                  </div>
+                    </div>
                   <div className="space-y-4">
                     <div>
                       <label className="block text-sm font-medium text-zinc-300 mb-2">
@@ -1336,7 +1454,7 @@ const Admin: React.FC = () => {
                   </div>
                 </div>
                 <div className="flex space-x-4">
-                  <button 
+                    <button
                     onClick={saveEditWeek}
                     className="btn-primary"
                   >
@@ -1396,10 +1514,10 @@ const Admin: React.FC = () => {
                                   onClick={() => deleteWeek(week.id)}
                                   className="text-red-400 hover:text-red-300 transition-colors"
                                   title="Excluir escala"
-                                >
-                                  <Trash2 className="h-4 w-4" />
-                                </button>
-                              </div>
+                    >
+                      <Trash2 className="h-4 w-4" />
+                    </button>
+                  </div>
                             </div>
                             {week.serviceName && (
                               <div className={`text-xs font-semibold mb-2 px-2 py-1 rounded-full ${
@@ -1423,10 +1541,10 @@ const Admin: React.FC = () => {
                             </div>
                           </div>
                         ))}
-                      </div>
-                    </div>
-                  ))}
+                  </div>
                 </div>
+              ))}
+            </div>
               </div>
             )}
           </div>
@@ -1573,7 +1691,13 @@ const Admin: React.FC = () => {
                 </div>
               </div>
 
-              <button onClick={handleAddRepertoire} className="btn-primary">
+              <button 
+                onClick={() => {
+                  console.log('🖱️ Botão "Adicionar Repertório" clicado!');
+                  handleAddRepertoire();
+                }} 
+                className="btn-primary"
+              >
                 <Plus className="h-4 w-4 mr-2" />
                 Adicionar Repertório
               </button>
@@ -1593,8 +1717,8 @@ const Admin: React.FC = () => {
                             <div className="space-y-3">
                               <div>
                                 <label className="block text-sm font-medium text-zinc-300 mb-2">Nome do Repertório</label>
-                                <input
-                                  type="text"
+                <input
+                  type="text"
                                   placeholder="Ex: Culto de Celebração, Louvor da Manhã..."
                                   value={editRepertoire.title}
                                   onChange={(e) => setEditRepertoire({ ...editRepertoire, title: e.target.value })}
@@ -1734,7 +1858,10 @@ const Admin: React.FC = () => {
                         <div>
                           <div className="flex items-center justify-between mb-3">
                             <div>
-                              <h3 className="text-lg font-semibold text-zinc-100">
+                              <h3 className="text-xl font-bold text-zinc-100 mb-2">
+                                {repertoire.title}
+                              </h3>
+                              <p className="text-sm text-zinc-400">
                                 📅 {(() => {
                                   const date = new Date(repertoire.weekDate + 'T12:00:00');
                                   return date.toLocaleDateString('pt-BR', { 
@@ -1745,7 +1872,7 @@ const Admin: React.FC = () => {
                                     timeZone: 'America/Sao_Paulo'
                                   });
                                 })()}
-                              </h3>
+                              </p>
                               {repertoire.playlistUrl && (
                                 <a 
                                   href={repertoire.playlistUrl} 
@@ -1866,14 +1993,14 @@ const Admin: React.FC = () => {
                     <label className="block text-sm font-medium text-zinc-300 mb-2">
                       Tom a ser cantado (opcional)
                     </label>
-                    <input
-                      type="text"
+                <input
+                  type="text"
                       placeholder="Ex: C, D, Em, F#, etc."
                       value={currentSongForm.customKey}
                       onChange={(e) => setCurrentSongForm({ ...currentSongForm, customKey: e.target.value })}
                       className="w-full px-3 py-2 bg-zinc-900 border border-zinc-600 text-zinc-100 placeholder-zinc-500 rounded-lg focus:ring-2 focus:ring-indigo-500"
-                    />
-                  </div>
+                />
+              </div>
                   
                   <div>
                     <label className="block text-sm font-medium text-zinc-300 mb-2">
@@ -1896,7 +2023,7 @@ const Admin: React.FC = () => {
 
                 <div>
                   <label className="flex items-center space-x-2 cursor-pointer">
-                    <input
+                <input
                       type="checkbox"
                       checked={currentSongForm.isInstrumental}
                       onChange={(e) => setCurrentSongForm({ ...currentSongForm, isInstrumental: e.target.checked })}
@@ -1948,7 +2075,7 @@ const Admin: React.FC = () => {
                   <div className="max-h-60 overflow-y-auto bg-zinc-900 border border-zinc-600 rounded-lg p-3 space-y-2">
                     {songs.map((song) => (
                       <label key={song.id} className="flex items-center cursor-pointer hover:bg-zinc-800 p-2 rounded">
-                        <input 
+                <input
                           type="checkbox" 
                           checked={currentSongForm.selectedSongs.includes(song.id)}
                           onChange={() => handleSongToggleInModal(song.id)}
@@ -1989,7 +2116,7 @@ const Admin: React.FC = () => {
                     <label className="block text-sm font-medium text-zinc-300 mb-2">
                       Momento do culto (opcional)
                     </label>
-                    <select
+                <select
                       value={currentSongForm.moment}
                       onChange={(e) => setCurrentSongForm({ ...currentSongForm, moment: e.target.value })}
                       className="w-full px-3 py-2 bg-zinc-900 border border-zinc-600 text-zinc-100 rounded-lg focus:ring-2 focus:ring-indigo-500"
@@ -2000,9 +2127,9 @@ const Admin: React.FC = () => {
                       <option value="Abertura">Abertura</option>
                       <option value="Ministração">Ministração</option>
                       <option value="Final">Final</option>
-                    </select>
-                  </div>
-                </div>
+                </select>
+              </div>
+            </div>
 
                 <div>
                   <label className="flex items-center space-x-2 cursor-pointer">
@@ -2029,7 +2156,7 @@ const Admin: React.FC = () => {
                 >
                   <Plus className="h-4 w-4 mr-2" />
                   Adicionar ao Repertório
-                </button>
+            </button>
                 <button
                   onClick={() => {
                     setShowEditSongModal(false);
@@ -2064,7 +2191,7 @@ const Admin: React.FC = () => {
                           onChange={() => handleSongToggleInModal(song.id)}
                           className="mr-3" 
                         />
-                        <div className="flex-1">
+                    <div className="flex-1">
                           <div className="text-zinc-100 text-sm font-medium">{song.title}</div>
                           <div className="text-zinc-400 text-xs">{song.artist}</div>
                         </div>
@@ -2124,13 +2251,13 @@ const Admin: React.FC = () => {
                     />
                     <span className="text-sm text-zinc-300">
                       Apenas instrumental (sem música específica do acervo)
-                    </span>
+                        </span>
                   </label>
-                </div>
-              </div>
+                      </div>
+                    </div>
 
               <div className="flex items-center space-x-3">
-                <button
+                    <button
                   onClick={saveEditRepertoireSong}
                   className="flex-1 btn-primary"
                 >
@@ -2142,9 +2269,9 @@ const Admin: React.FC = () => {
                   className="flex-1 px-4 py-2 bg-zinc-700 text-zinc-300 rounded-lg hover:bg-zinc-600 transition-colors"
                 >
                   Cancelar
-                </button>
-              </div>
-            </div>
+                    </button>
+                  </div>
+                </div>
           </div>
         )}
 
@@ -2256,6 +2383,16 @@ const Admin: React.FC = () => {
         {activeTab === 'settings' && (
           <div>
             <h2 className="text-2xl font-bold text-zinc-100 mb-6">Configurações</h2>
+            
+            {/* Criar Collections */}
+            <div className="mb-6">
+              <CreateCollectionsButton />
+            </div>
+            
+            {/* Migração para Firebase */}
+            <div className="mb-6">
+              <MigrationButton />
+            </div>
 
             <div className="bg-zinc-800 rounded-lg p-6 border border-zinc-700">
               <h3 className="text-lg font-semibold text-zinc-100 mb-4">Informações do Ministério</h3>

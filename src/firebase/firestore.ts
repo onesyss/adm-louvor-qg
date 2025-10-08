@@ -13,33 +13,51 @@ import {
 } from 'firebase/firestore';
 import { db } from './config';
 
+// Função auxiliar para remover campos undefined recursivamente
+const removeUndefined = (obj: any): any => {
+  if (Array.isArray(obj)) {
+    return obj.map(item => removeUndefined(item));
+  }
+  
+  if (obj !== null && typeof obj === 'object') {
+    return Object.fromEntries(
+      Object.entries(obj)
+        .filter(([_, value]) => value !== undefined)
+        .map(([key, value]) => [key, removeUndefined(value)])
+    );
+  }
+  
+  return obj;
+};
+
 // Função genérica para adicionar documento
 export const addDocument = async (collectionName: string, data: any) => {
   try {
-    console.log(`➕ Adicionando documento em ${collectionName} com ID:`, data.id);
+    console.log(`➕ Adicionando documento em ${collectionName}`);
+    console.log('📝 Dados originais:', data);
     
-    // Se tem ID, usar setDoc para definir o ID do documento
-    if (data.id) {
-      const docRef = doc(db, collectionName, data.id);
-      await setDoc(docRef, {
-        ...data,
-        createdAt: Timestamp.now(),
-        updatedAt: Timestamp.now()
-      });
-      console.log(`✅ Documento criado com ID customizado: ${data.id}`);
-      return data;
-    } else {
-      // Se não tem ID, usar addDoc (gera ID automático)
-      const docRef = await addDoc(collection(db, collectionName), {
-        ...data,
-        createdAt: Timestamp.now(),
-        updatedAt: Timestamp.now()
-      });
-      console.log(`✅ Documento criado com ID automático: ${docRef.id}`);
-      return { id: docRef.id, ...data };
-    }
-  } catch (error) {
-    console.error(`Error adding document to ${collectionName}:`, error);
+    // Sempre usar addDoc (ID gerado pelo Firestore)
+    // Remover campo 'id' e campos 'undefined' dos dados antes de salvar
+    const { id, ...dataWithoutId } = data;
+    
+    // Remover campos undefined recursivamente (Firestore não aceita)
+    const cleanData = removeUndefined(dataWithoutId);
+    
+    console.log('✨ Dados limpos:', cleanData);
+    
+    const docRef = await addDoc(collection(db, collectionName), {
+      ...cleanData,
+      createdAt: Timestamp.now(),
+      updatedAt: Timestamp.now()
+    });
+    
+    console.log(`✅ Documento criado com ID automático do Firestore: ${docRef.id}`);
+    
+    return { id: docRef.id, ...cleanData };
+  } catch (error: any) {
+    console.error(`❌ Error adding document to ${collectionName}:`, error);
+    console.error('Error code:', error.code);
+    console.error('Error message:', error.message);
     throw error;
   }
 };
@@ -47,12 +65,15 @@ export const addDocument = async (collectionName: string, data: any) => {
 // Função genérica para atualizar documento
 export const updateDocument = async (collectionName: string, id: string, data: any) => {
   try {
+    // Remover campos undefined recursivamente (Firestore não aceita)
+    const cleanData = removeUndefined(data);
+    
     const docRef = doc(db, collectionName, id);
     await updateDoc(docRef, {
-      ...data,
+      ...cleanData,
       updatedAt: Timestamp.now()
     });
-    return { id, ...data };
+    return { id, ...cleanData };
   } catch (error) {
     console.error(`Error updating document in ${collectionName}:`, error);
     throw error;
