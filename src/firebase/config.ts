@@ -11,6 +11,11 @@ const firebaseConfig = {
   appId: import.meta.env.VITE_FIREBASE_APP_ID || "1:893794036853:web:2774e757369e17c8a3dc3c"
 };
 
+console.log('🔥 Firebase Config:');
+console.log('  - Project ID:', firebaseConfig.projectId);
+console.log('  - Auth Domain:', firebaseConfig.authDomain);
+console.log('  - Usando variáveis de ambiente?', !!import.meta.env.VITE_FIREBASE_PROJECT_ID);
+
 // Initialize Firebase
 const app = initializeApp(firebaseConfig);
 

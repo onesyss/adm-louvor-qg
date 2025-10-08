@@ -248,16 +248,24 @@ export const AppProvider: React.FC<AppProviderProps> = ({ children }) => {
     console.log('🔄 Configurando sincronização em tempo real para repertoires...');
     try {
       const unsubscribe = subscribeToCollection('repertoires', (data) => {
-        console.log('✅ Dados de repertoires atualizados:', data.length, 'documentos');
+        console.log('🔔 onSnapshot detectou mudança em repertoires:', data.length, 'documentos');
+        console.log('📋 Repertoires recebidos:', data);
+        
+        // Verificar se os dados têm title
+        const repertoiresWithoutTitle = data.filter((r: any) => !r.title);
+        if (repertoiresWithoutTitle.length > 0) {
+          console.warn('⚠️ Repertórios sem título:', repertoiresWithoutTitle);
+        }
+        
         setRepertoires(data as Repertoire[]);
-        console.log('✅ Estado de repertoires atualizado!');
+        console.log('✅ Estado de repertoires atualizado para', data.length, 'documentos');
       });
       return () => {
         console.log('❌ Cancelando sincronização de repertoires');
         unsubscribe();
       };
     } catch (error) {
-      console.error('Error setting up repertoires sync:', error);
+      console.error('❌ Error setting up repertoires sync:', error);
     }
   }, []);
 
