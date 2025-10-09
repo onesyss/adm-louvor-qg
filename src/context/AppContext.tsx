@@ -55,26 +55,6 @@ interface AppProviderProps {
 }
 
 export const AppProvider: React.FC<AppProviderProps> = ({ children }) => {
-  // Dados iniciais dos músicos
-  const initialMusicians: Musician[] = [
-    { id: '1', name: 'João Silva', instrument: 'Guitarra', photoUrl: 'https://i.pravatar.cc/100?img=1' },
-    { id: '2', name: 'Maria Santos', instrument: 'Teclado', photoUrl: 'https://i.pravatar.cc/100?img=2' },
-    { id: '3', name: 'Pedro Costa', instrument: 'Bateria', photoUrl: 'https://i.pravatar.cc/100?img=3' },
-    { id: '4', name: 'Ana Lima', instrument: 'Baixo', photoUrl: 'https://i.pravatar.cc/100?img=4' },
-    { id: '5', name: 'Carlos Oliveira', instrument: 'Violão', photoUrl: 'https://i.pravatar.cc/100?img=5' },
-    { id: '6', name: 'Fernanda Souza', instrument: 'Teclado', photoUrl: 'https://i.pravatar.cc/100?img=6' },
-    { id: '7', name: 'Rafael Mendes', instrument: 'Bateria', photoUrl: 'https://i.pravatar.cc/100?img=7' },
-    { id: '8', name: 'Juliana Costa', instrument: 'Baixo', photoUrl: 'https://i.pravatar.cc/100?img=8' },
-    { id: '9', name: 'Lucas Alves', instrument: 'Vocal', photoUrl: 'https://i.pravatar.cc/100?img=9' },
-    { id: '10', name: 'Beatriz Silva', instrument: 'Vocal', photoUrl: 'https://i.pravatar.cc/100?img=10' },
-    { id: '11', name: 'Gabriel Santos', instrument: 'Vocal', photoUrl: 'https://i.pravatar.cc/100?img=11' },
-    { id: '12', name: 'Camila Lima', instrument: 'Vocal', photoUrl: 'https://i.pravatar.cc/100?img=12' },
-    { id: '13', name: 'Diego Costa', instrument: 'Vocal', photoUrl: 'https://i.pravatar.cc/100?img=13' },
-    { id: '14', name: 'Roberto Almeida', instrument: 'Técnico de Som', photoUrl: 'https://i.pravatar.cc/100?img=14' },
-    { id: '15', name: 'Patricia Mendes', instrument: 'Técnico de Som', photoUrl: 'https://i.pravatar.cc/100?img=15' },
-    { id: '16', name: 'Marcos Silva', instrument: 'Técnico de Som', photoUrl: 'https://i.pravatar.cc/100?img=16' }
-  ];
-
   // Estado dos músicos
   const [musicians, setMusicians] = useState<Musician[]>([]);
 
@@ -104,76 +84,6 @@ export const AppProvider: React.FC<AppProviderProps> = ({ children }) => {
       }
     };
   }, []);
-
-  // Dados iniciais das músicas
-  const initialSongs: Song[] = [
-    {
-      id: '1',
-      title: 'Grande é o Senhor',
-      artist: 'Nívea Soares',
-      youtubeUrl: 'https://youtube.com/watch?v=example1',
-      spotifyUrl: 'https://spotify.com/track/example1',
-      key: 'C',
-      tempo: 120,
-      tags: ['adoração'],
-      lyrics: 'Grande é o Senhor, grande é o Senhor...'
-    },
-    {
-      id: '2',
-      title: 'Como é Grande o Meu Deus',
-      artist: 'Chris Tomlin',
-      youtubeUrl: 'https://youtube.com/watch?v=example2',
-      spotifyUrl: 'https://spotify.com/track/example2',
-      key: 'G',
-      tempo: 110,
-      tags: ['adoração'],
-      lyrics: 'Como é grande o meu Deus, como é grande o meu Deus...'
-    },
-    {
-      id: '3',
-      title: 'Santo Espírito',
-      artist: 'Ministério Zoe',
-      youtubeUrl: 'https://youtube.com/watch?v=example3',
-      spotifyUrl: 'https://spotify.com/track/example3',
-      key: 'D',
-      tempo: 95,
-      tags: ['adoração'],
-      lyrics: 'Santo Espírito, enche este lugar...'
-    },
-    {
-      id: '4',
-      title: 'Oceano',
-      artist: 'Ministério Zoe',
-      youtubeUrl: 'https://youtube.com/watch?v=example4',
-      spotifyUrl: 'https://spotify.com/track/example4',
-      key: 'F',
-      tempo: 105,
-      tags: ['adoração'],
-      lyrics: 'Meu coração é um oceano...'
-    },
-    {
-      id: '5',
-      title: 'Rei dos Reis',
-      artist: 'Hillsong Worship',
-      youtubeUrl: 'https://youtube.com/watch?v=example5',
-      spotifyUrl: 'https://spotify.com/track/example5',
-      key: 'A',
-      tempo: 130,
-      tags: ['celebração'],
-      lyrics: 'Rei dos Reis, Senhor dos senhores...'
-    },
-    {
-      id: '6',
-      title: 'Deus de Promessas',
-      artist: 'Ministério Zoe',
-      youtubeUrl: 'https://youtube.com/watch?v=example6',
-      spotifyUrl: 'https://spotify.com/track/example6',
-      key: 'E',
-      tempo: 100,
-      tags: ['celebração'],
-      lyrics: 'Deus de promessas, tu és fiel...'
-    }
-  ];
 
   // Estado das músicas
   const [songs, setSongs] = useState<Song[]>([]);
