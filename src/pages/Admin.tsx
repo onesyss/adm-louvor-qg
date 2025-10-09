@@ -238,7 +238,7 @@ const Admin: React.FC = () => {
       date: newScale.date || new Date(newScale.year, newScale.month, 1 + (newScale.weekNumber - 1) * 7).toISOString().split('T')[0],
       serviceName: newScale.serviceName || undefined,
       musicians: selectedMusiciansData,
-      vocals: [] // Por enquanto vazio, pode ser implementado depois
+      vocals: []
     };
 
     const scheduleId = `${newScale.month}-${newScale.year}`;
@@ -370,7 +370,8 @@ const Admin: React.FC = () => {
                 weekNumber: editScale.weekNumber,
                 date: editScale.date || week.date,
                 serviceName: editScale.serviceName || undefined,
-                musicians: selectedMusiciansData
+                musicians: selectedMusiciansData,
+                vocals: []
               }
             : week
         )
@@ -406,42 +407,82 @@ const Admin: React.FC = () => {
     setEditCustomServiceName('');
   };
 
-  const moveWeekUp = (weekId: string) => {
-    setSchedules((prev: MonthSchedule[]) => 
-      prev.map((schedule: MonthSchedule) => {
-        const weekIndex = schedule.weeks.findIndex((w: WeekSchedule) => w.id === weekId);
-        if (weekIndex > 0) {
-          const newWeeks = [...schedule.weeks];
-          [newWeeks[weekIndex - 1], newWeeks[weekIndex]] = [newWeeks[weekIndex], newWeeks[weekIndex - 1]];
-          return { ...schedule, weeks: newWeeks };
-        }
-        return schedule;
-      })
+  const moveWeekUp = async (weekId: string) => {
+    // Encontrar o schedule que contém esta week
+    const scheduleWithWeek = schedules.find((s: MonthSchedule) => 
+      s.weeks.some((w: WeekSchedule) => w.id === weekId)
     );
-    addNotification({
-      type: 'success',
-      title: 'Escala movida!',
-      message: 'A escala foi movida para cima.'
-    });
+    
+    if (scheduleWithWeek) {
+      const weekIndex = scheduleWithWeek.weeks.findIndex((w: WeekSchedule) => w.id === weekId);
+      
+      if (weekIndex > 0) {
+        const newWeeks = [...scheduleWithWeek.weeks];
+        [newWeeks[weekIndex - 1], newWeeks[weekIndex]] = [newWeeks[weekIndex], newWeeks[weekIndex - 1]];
+        
+        const updatedSchedule = {
+          ...scheduleWithWeek,
+          weeks: newWeeks
+        };
+        
+        try {
+          await upsertDocument('schedules', scheduleWithWeek.id, updatedSchedule);
+          console.log('✅ Ordem da escala salva no Firestore');
+          
+          addNotification({
+            type: 'success',
+            title: 'Escala movida!',
+            message: 'A escala foi movida para cima.'
+          });
+        } catch (error) {
+          console.error('❌ Erro ao mover escala:', error);
+          addNotification({
+            type: 'error',
+            title: 'Erro',
+            message: 'Não foi possível mover a escala.'
+          });
+        }
+      }
+    }
   };
 
-  const moveWeekDown = (weekId: string) => {
-    setSchedules((prev: MonthSchedule[]) => 
-      prev.map((schedule: MonthSchedule) => {
-        const weekIndex = schedule.weeks.findIndex((w: WeekSchedule) => w.id === weekId);
-        if (weekIndex < schedule.weeks.length - 1) {
-          const newWeeks = [...schedule.weeks];
-          [newWeeks[weekIndex], newWeeks[weekIndex + 1]] = [newWeeks[weekIndex + 1], newWeeks[weekIndex]];
-          return { ...schedule, weeks: newWeeks };
-        }
-        return schedule;
-      })
+  const moveWeekDown = async (weekId: string) => {
+    // Encontrar o schedule que contém esta week
+    const scheduleWithWeek = schedules.find((s: MonthSchedule) => 
+      s.weeks.some((w: WeekSchedule) => w.id === weekId)
     );
-    addNotification({
-      type: 'success',
-      title: 'Escala movida!',
-      message: 'A escala foi movida para baixo.'
-    });
+    
+    if (scheduleWithWeek) {
+      const weekIndex = scheduleWithWeek.weeks.findIndex((w: WeekSchedule) => w.id === weekId);
+      
+      if (weekIndex < scheduleWithWeek.weeks.length - 1) {
+        const newWeeks = [...scheduleWithWeek.weeks];
+        [newWeeks[weekIndex], newWeeks[weekIndex + 1]] = [newWeeks[weekIndex + 1], newWeeks[weekIndex]];
+        
+        const updatedSchedule = {
+          ...scheduleWithWeek,
+          weeks: newWeeks
+        };
+        
+        try {
+          await upsertDocument('schedules', scheduleWithWeek.id, updatedSchedule);
+          console.log('✅ Ordem da escala salva no Firestore');
+          
+          addNotification({
+            type: 'success',
+            title: 'Escala movida!',
+            message: 'A escala foi movida para baixo.'
+          });
+        } catch (error) {
+          console.error('❌ Erro ao mover escala:', error);
+          addNotification({
+            type: 'error',
+            title: 'Erro',
+            message: 'Não foi possível mover a escala.'
+          });
+        }
+      }
+    }
   };
 
   const deleteWeek = async (weekId: string) => {

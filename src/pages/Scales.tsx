@@ -89,7 +89,7 @@ const Scales: React.FC = () => {
         <div className="glass p-6">
           <div className="grid grid-cols-1 lg:grid-cols-4 gap-6">
             {(() => {
-              // Agrupar escalas por semana
+              // Agrupar escalas por semana PRESERVANDO A ORDEM do array original
               const weeksGrouped = currentSchedule.weeks.reduce((acc, week) => {
                 if (!acc[week.weekNumber]) {
                   acc[week.weekNumber] = [];
@@ -98,7 +98,19 @@ const Scales: React.FC = () => {
                 return acc;
               }, {} as Record<number, typeof currentSchedule.weeks>);
 
-              return Object.entries(weeksGrouped).map(([weekNumber, weeks]) => (
+              // Criar array ordenado mantendo a ordem original das weeks
+              const orderedWeeks: Array<[string, typeof currentSchedule.weeks]> = [];
+              const processedWeekNumbers = new Set<number>();
+              
+              // Percorrer o array original para manter a ordem
+              currentSchedule.weeks.forEach(week => {
+                if (!processedWeekNumbers.has(week.weekNumber)) {
+                  orderedWeeks.push([week.weekNumber.toString(), weeksGrouped[week.weekNumber]]);
+                  processedWeekNumbers.add(week.weekNumber);
+                }
+              });
+
+              return orderedWeeks.map(([weekNumber, weeks]) => (
                 <div key={weekNumber} className="bg-zinc-800 rounded-lg p-6 border border-zinc-700">
                   <div className="mb-4">
                     <div className="flex items-center justify-between mb-2">
@@ -131,36 +143,22 @@ const Scales: React.FC = () => {
                           )}
                         </div>
 
-                        {/* Musicians */}
+                        {/* Colaboradores (Músicos + Vocais) */}
                         <div className="mb-4">
                           <h4 className="text-sm font-medium text-zinc-300 mb-2 flex items-center">
                             <Users className="h-4 w-4 mr-1" />
-                            Músicos ({week.musicians.length})
+                            Colaboradores ({week.musicians.length})
                           </h4>
                           <div className="space-y-2">
                             {week.musicians.map((musician) => (
                               <div key={musician.id} className="flex items-center justify-between text-sm">
                                 <span className="text-zinc-100">{musician.name}</span>
-                                <span className="px-2 py-1 bg-indigo-900/40 text-indigo-300 border border-indigo-800 rounded-full text-xs">
+                                <span className={`px-2 py-1 border rounded-full text-xs ${
+                                  musician.instrument === 'Vocal'
+                                    ? 'bg-green-900/40 text-green-300 border-green-800'
+                                    : 'bg-indigo-900/40 text-indigo-300 border-indigo-800'
+                                }`}>
                                   {musician.instrument}
-                                </span>
-                              </div>
-                            ))}
-                          </div>
-                        </div>
-
-                        {/* Vocals */}
-                        <div className="mb-4">
-                          <h4 className="text-sm font-medium text-zinc-300 mb-2 flex items-center">
-                            <Music className="h-4 w-4 mr-1" />
-                            Vocais ({week.vocals.length})
-                          </h4>
-                          <div className="space-y-2">
-                            {week.vocals.map((vocal, index) => (
-                              <div key={vocal.id} className="flex items-center justify-between text-sm">
-                                <span className="text-zinc-100">{vocal.name}</span>
-                                <span className="px-2 py-1 bg-green-900/40 text-green-300 border border-green-800 rounded-full text-xs">
-                                  Música {index + 1}
                                 </span>
                               </div>
                             ))}
