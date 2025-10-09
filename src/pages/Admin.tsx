@@ -15,8 +15,6 @@ import {
 import { AgendaItem, MonthSchedule, WeekSchedule } from '../types';
 import { useAppContext } from '../context/AppContext';
 import { useNotification } from '../components/Notification';
-import MigrationButton from '../components/MigrationButton';
-import CreateCollectionsButton from '../components/CreateCollectionsButton';
 import { addDocument, updateDocument, deleteDocument } from '../firebase/firestore';
 import { signOut } from 'firebase/auth';
 import { auth } from '../firebase/config';
@@ -1193,8 +1191,8 @@ const Admin: React.FC = () => {
                         <option value="Outro">Outro (especificar)</option>
                       </select>
                       {showCustomServiceName && (
-                        <input
-                          type="text"
+                <input
+                  type="text"
                           placeholder="Especifique o tipo de culto"
                           value={customServiceName}
                           onChange={(e) => {
@@ -2383,16 +2381,6 @@ const Admin: React.FC = () => {
         {activeTab === 'settings' && (
           <div>
             <h2 className="text-2xl font-bold text-zinc-100 mb-6">Configurações</h2>
-            
-            {/* Criar Collections */}
-            <div className="mb-6">
-              <CreateCollectionsButton />
-            </div>
-            
-            {/* Migração para Firebase */}
-            <div className="mb-6">
-              <MigrationButton />
-            </div>
 
             <div className="bg-zinc-800 rounded-lg p-6 border border-zinc-700">
               <h3 className="text-lg font-semibold text-zinc-100 mb-4">Informações do Ministério</h3>
