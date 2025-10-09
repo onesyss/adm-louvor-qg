@@ -22,7 +22,7 @@ import '../utils/cleanDuplicateSchedules';
 
 const Admin: React.FC = () => {
   const [activeTab, setActiveTab] = useState<'agenda' | 'scales' | 'repertoire' | 'settings'>('agenda');
-  const { songs, musicians, schedules, setSchedules, agendaItems, addAgendaItem: addAgendaItemContext, updateAgendaItem, deleteAgendaItem: deleteAgendaItemContext, repertoires, addRepertoire: addRepertoireContext, updateRepertoire, deleteRepertoire: deleteRepertoireContext } = useAppContext();
+  const { songs, musicians, schedules, agendaItems, addAgendaItem: addAgendaItemContext, updateAgendaItem, deleteAgendaItem: deleteAgendaItemContext, repertoires, addRepertoire: addRepertoireContext, updateRepertoire, deleteRepertoire: deleteRepertoireContext } = useAppContext();
   const { addNotification, showConfirm } = useNotification();
 
   // Estados para o formulário de escala

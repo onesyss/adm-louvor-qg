@@ -1,4 +1,4 @@
-import React, { useState, useCallback } from 'react';
+import React, { useState } from 'react';
 import { Users, Guitar, Mic, Music, Volume2, Plus, Save, X, Edit, Trash2, Search } from 'lucide-react';
 import { useAppContext } from '../context/AppContext';
 import { useNotification } from '../components/Notification';

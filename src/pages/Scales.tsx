@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Calendar, Users, Music } from 'lucide-react';
+import { Calendar, Users } from 'lucide-react';
 import { useAppContext } from '../context/AppContext';
 
 const Scales: React.FC = () => {
