@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useCallback } from 'react';
 import { Users, Guitar, Mic, Music, Volume2, Plus, Save, X, Edit, Trash2, Search } from 'lucide-react';
 import { useAppContext } from '../context/AppContext';
 import { useNotification } from '../components/Notification';
@@ -238,6 +238,8 @@ const Musicians: React.FC = () => {
               value={editMusician.name}
               onChange={(e) => setEditMusician({ ...editMusician, name: e.target.value })}
               className="w-full px-3 py-2 bg-zinc-700 border border-zinc-600 text-zinc-100 rounded-lg focus:ring-2 focus:ring-indigo-500"
+              autoFocus
+              placeholder="Nome e sobrenome"
             />
             <select
               value={editMusician.instrument}
@@ -556,7 +558,10 @@ const Musicians: React.FC = () => {
           {filteredInstrumentMusicians.length > 0 ? (
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
               {filteredInstrumentMusicians.map((musician) => (
-                <MusicianCard key={musician.id} musician={musician} />
+                <MusicianCard 
+                  key={musician.id} 
+                  musician={musician} 
+                />
               ))}
             </div>
           ) : (
