@@ -1,6 +1,7 @@
 import { 
   collection, 
   addDoc,
+  setDoc,
   updateDoc, 
   deleteDoc, 
   doc, 
@@ -75,6 +76,39 @@ export const updateDocument = async (collectionName: string, id: string, data: a
     return { id, ...cleanData };
   } catch (error) {
     console.error(`Error updating document in ${collectionName}:`, error);
+    throw error;
+  }
+};
+
+// Função para criar OU atualizar documento (upsert)
+export const upsertDocument = async (collectionName: string, id: string, data: any) => {
+  try {
+    console.log(`🔄 Upsert documento em ${collectionName}/${id}...`);
+    console.log('📝 Dados recebidos:', data);
+    
+    // Remover campo 'id' dos dados (o ID já está no parâmetro)
+    const { id: dataId, ...dataWithoutId } = data;
+    
+    // Remover campos undefined recursivamente
+    const cleanData = removeUndefined(dataWithoutId);
+    
+    console.log('✨ Dados limpos (sem id):', cleanData);
+    
+    const docRef = doc(db, collectionName, id);
+    await setDoc(docRef, {
+      ...cleanData,
+      updatedAt: Timestamp.now()
+    }, { merge: true }); // merge: true = cria se não existe, atualiza se existe
+    
+    console.log(`✅ Documento ${collectionName}/${id} criado/atualizado com sucesso!`);
+    
+    const result = { id, ...cleanData };
+    console.log('📤 Retornando:', result);
+    return result;
+  } catch (error: any) {
+    console.error(`❌ Error upserting document in ${collectionName}/${id}:`, error);
+    console.error('Error code:', error.code);
+    console.error('Error message:', error.message);
     throw error;
   }
 };

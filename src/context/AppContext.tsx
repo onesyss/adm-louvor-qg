@@ -139,9 +139,30 @@ export const AppProvider: React.FC<AppProviderProps> = ({ children }) => {
     console.log('🔄 Configurando sincronização em tempo real para schedules...');
     try {
       const unsubscribe = subscribeToCollection('schedules', (data) => {
-        console.log('✅ Dados de schedules atualizados:', data.length, 'documentos');
+        console.log('🔔 onSnapshot detectou mudança em schedules:', data.length, 'documentos');
         console.log('📊 Schedules recebidos:', data);
-        setSchedules(data as MonthSchedule[]);
+        
+        // SEMPRE remover duplicatas (Firestore pode retornar duplicatas temporárias durante writes)
+        const uniqueSchedules = data.reduce((acc: any[], current: any) => {
+          const existingIndex = acc.findIndex(item => item.id === current.id);
+          if (existingIndex === -1) {
+            // Não existe, adicionar
+            acc.push(current);
+          } else {
+            // Já existe, manter o que tem mais weeks (mais completo)
+            if (current.weeks && current.weeks.length > (acc[existingIndex].weeks?.length || 0)) {
+              acc[existingIndex] = current;
+            }
+          }
+          return acc;
+        }, []);
+        
+        if (uniqueSchedules.length !== data.length) {
+          console.warn(`⚠️ Duplicatas removidas: ${data.length} → ${uniqueSchedules.length} schedules`);
+        }
+        
+        setSchedules(uniqueSchedules as MonthSchedule[]);
+        
         console.log('✅ Estado de schedules atualizado!');
       });
       return () => {

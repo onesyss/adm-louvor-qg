@@ -15,9 +15,10 @@ import {
 import { AgendaItem, MonthSchedule, WeekSchedule } from '../types';
 import { useAppContext } from '../context/AppContext';
 import { useNotification } from '../components/Notification';
-import { addDocument, updateDocument, deleteDocument } from '../firebase/firestore';
+import { deleteDocument, upsertDocument } from '../firebase/firestore';
 import { signOut } from 'firebase/auth';
 import { auth } from '../firebase/config';
+import '../utils/cleanDuplicateSchedules';
 
 const Admin: React.FC = () => {
   const [activeTab, setActiveTab] = useState<'agenda' | 'scales' | 'repertoire' | 'settings'>('agenda');
@@ -264,10 +265,10 @@ const Admin: React.FC = () => {
       };
       
       try {
-        await updateDocument('schedules', scheduleId, updatedSchedule);
-        console.log('✅ Schedule atualizado no Firestore');
+        await upsertDocument('schedules', scheduleId, updatedSchedule);
+        console.log('✅ Schedule criado/atualizado no Firestore');
       } catch (error) {
-        console.error('❌ Erro ao atualizar schedule:', error);
+        console.error('❌ Erro ao criar/atualizar schedule:', error);
       }
     } else {
       // Criar novo schedule
@@ -279,7 +280,7 @@ const Admin: React.FC = () => {
       };
       
       try {
-        await addDocument('schedules', newSchedule);
+        await upsertDocument('schedules', scheduleId, newSchedule);
         console.log('✅ Schedule criado no Firestore');
       } catch (error) {
         console.error('❌ Erro ao criar schedule:', error);
@@ -376,7 +377,7 @@ const Admin: React.FC = () => {
       };
       
       try {
-        await updateDocument('schedules', scheduleWithWeek.id, updatedSchedule);
+        await upsertDocument('schedules', scheduleWithWeek.id, updatedSchedule);
         console.log('✅ Schedule editado no Firestore');
       } catch (error) {
         console.error('❌ Erro ao editar schedule:', error);
@@ -444,51 +445,83 @@ const Admin: React.FC = () => {
   };
 
   const deleteWeek = async (weekId: string) => {
+    console.log('🖱️ Botão Delete clicado! Week ID:', weekId);
+    console.log('📋 Tipo do weekId:', typeof weekId, weekId);
+    
     const confirmed = await showConfirm(
       'Excluir Escala',
       'Tem certeza que deseja excluir esta escala? Esta ação não pode ser desfeita.'
     );
     
     if (confirmed) {
+      console.log('✅ Usuário confirmou a exclusão');
       console.log('🗑️ Deletando escala:', weekId);
+      console.log('📊 Total de schedules:', schedules.length);
+      console.log('📊 Schedules completos:', JSON.stringify(schedules, null, 2));
       
       // Encontrar o schedule que contém esta week
       const scheduleWithWeek = schedules.find((s: MonthSchedule) => 
         s.weeks.some((w: WeekSchedule) => w.id === weekId)
       );
       
+      console.log('📋 Schedule encontrado:', scheduleWithWeek);
+      
       if (scheduleWithWeek) {
         const updatedWeeks = scheduleWithWeek.weeks.filter((w: WeekSchedule) => w.id !== weekId);
+        console.log(`📝 Weeks após remoção: ${updatedWeeks.length} (antes: ${scheduleWithWeek.weeks.length})`);
         
         if (updatedWeeks.length === 0) {
           // Se não sobrou nenhuma semana, deletar o schedule inteiro
+          console.log('⚠️ Nenhuma week restante. Deletando schedule inteiro...');
           try {
             await deleteDocument('schedules', scheduleWithWeek.id);
             console.log('✅ Schedule deletado do Firestore (estava vazio)');
           } catch (error) {
             console.error('❌ Erro ao deletar schedule:', error);
+            addNotification({
+              type: 'error',
+              title: 'Erro ao excluir',
+              message: 'Não foi possível excluir a escala.'
+            });
+            return;
           }
         } else {
           // Atualizar o schedule com as semanas restantes
+          console.log('🔄 Atualizando schedule com weeks restantes...');
           const updatedSchedule = {
             ...scheduleWithWeek,
             weeks: updatedWeeks
           };
           
           try {
-            await updateDocument('schedules', scheduleWithWeek.id, updatedSchedule);
+            await upsertDocument('schedules', scheduleWithWeek.id, updatedSchedule);
             console.log('✅ Schedule atualizado no Firestore (week removida)');
           } catch (error) {
             console.error('❌ Erro ao atualizar schedule:', error);
+            addNotification({
+              type: 'error',
+              title: 'Erro ao excluir',
+              message: 'Não foi possível excluir a escala.'
+            });
+            return;
           }
         }
+        
+        addNotification({
+          type: 'success',
+          title: 'Escala excluída!',
+          message: 'A escala foi removida com sucesso.'
+        });
+      } else {
+        console.error('❌ Schedule não encontrado!');
+        addNotification({
+          type: 'error',
+          title: 'Erro',
+          message: 'Escala não encontrada.'
+        });
       }
-      
-      addNotification({
-        type: 'success',
-        title: 'Escala excluída!',
-        message: 'A escala foi removida com sucesso.'
-      });
+    } else {
+      console.log('❌ Usuário cancelou a exclusão');
     }
   };
 
@@ -1509,12 +1542,17 @@ const Admin: React.FC = () => {
                                   <Edit className="h-4 w-4" />
                                 </button>
                                 <button
-                                  onClick={() => deleteWeek(week.id)}
+                                  onClick={() => {
+                                    console.log('🔴 CLICK NO BOTÃO DELETE!');
+                                    console.log('Week ID:', week.id);
+                                    console.log('Week:', week);
+                                    deleteWeek(week.id);
+                                  }}
                                   className="text-red-400 hover:text-red-300 transition-colors"
                                   title="Excluir escala"
-                    >
-                      <Trash2 className="h-4 w-4" />
-                    </button>
+                                >
+                                  <Trash2 className="h-4 w-4" />
+                                </button>
                   </div>
                             </div>
                             {week.serviceName && (
