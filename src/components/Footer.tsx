@@ -24,7 +24,7 @@ const Footer: React.FC = () => {
             <div className="space-y-2">
               <div className="flex items-center justify-center md:justify-start gap-3">
                 <img 
-                  src="/src/assets/img/cassio.jpeg" 
+                  src="/img/cassio.jpeg" 
                   alt="Pastor Cassio Calderaro" 
                   className="w-10 h-10 rounded-full object-cover border-2 border-indigo-500/50"
                   onError={(e) => {
@@ -44,7 +44,7 @@ const Footer: React.FC = () => {
               </div>
               <div className="flex items-center justify-center md:justify-start gap-3">
                 <img 
-                  src="/src/assets/img/vanessa.jpeg" 
+                  src="/img/vanessa.jpeg" 
                   alt="Vanessa Calderaro" 
                   className="w-10 h-10 rounded-full object-cover border-2 border-purple-500/50"
                   onError={(e) => {

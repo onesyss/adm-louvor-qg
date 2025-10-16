@@ -96,7 +96,7 @@ const Home: React.FC = () => {
             <div className="flex flex-col items-center text-center">
               <div className="w-32 h-32 rounded-full bg-gradient-to-br from-indigo-500 to-purple-600 flex items-center justify-center mb-4 shadow-lg overflow-hidden border-4 border-indigo-500/30">
                 <img 
-                  src="/src/assets/img/cassio.jpeg" 
+                  src="/img/cassio.jpeg" 
                   alt="Pastor Cassio Calderaro" 
                   className="w-full h-full object-cover"
                   onError={(e) => {
@@ -128,7 +128,7 @@ const Home: React.FC = () => {
             <div className="flex flex-col items-center text-center">
               <div className="w-32 h-32 rounded-full bg-gradient-to-br from-purple-500 to-pink-600 flex items-center justify-center mb-4 shadow-lg overflow-hidden border-4 border-purple-500/30">
                 <img 
-                  src="/src/assets/img/vanessa.jpeg" 
+                  src="/img/vanessa.jpeg" 
                   alt="Vanessa Calderaro" 
                   className="w-full h-full object-cover"
                   onError={(e) => {
