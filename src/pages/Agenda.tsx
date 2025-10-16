@@ -2,9 +2,11 @@ import React, { useState } from 'react';
 import { Calendar, Clock, MapPin, Users, Music } from 'lucide-react';
 import { AgendaItem } from '../types';
 import { useAppContext } from '../context/AppContext';
+import { useTheme } from '../context/ThemeContext';
 
 const Agenda: React.FC = () => {
   const { agendaItems } = useAppContext();
+  const { theme } = useTheme();
   const [filter, setFilter] = useState<'all' | 'rehearsal' | 'service' | 'event' | 'meeting'>('all');
 
   const getTypeIcon = (type: AgendaItem['type']) => {
@@ -77,10 +79,14 @@ const Agenda: React.FC = () => {
       <div className="glass p-6">
         <div className="flex items-center justify-between">
           <div className="flex items-center space-x-4">
-            <Calendar className="h-8 w-8 text-indigo-400" />
+            <Calendar className="h-8 w-8 text-indigo-500" />
             <div>
-              <h1 className="text-3xl font-bold text-zinc-100">Agenda</h1>
-              <p className="text-zinc-400">Organize eventos, ensaios e reuniões do ministério</p>
+              <h1 className={`text-3xl font-bold ${theme === 'dark' ? 'text-zinc-100' : 'text-gray-900'}`}>
+                Agenda
+              </h1>
+              <p className={theme === 'dark' ? 'text-zinc-400' : 'text-gray-600'}>
+                Organize eventos, ensaios e reuniões do ministério
+              </p>
             </div>
           </div>
         </div>
@@ -88,10 +94,14 @@ const Agenda: React.FC = () => {
 
       {/* Upcoming Events */}
       <div className="glass p-6">
-        <h2 className="text-xl font-semibold text-zinc-100 mb-4">Próximos Eventos</h2>
+        <h2 className={`text-xl font-semibold mb-4 ${theme === 'dark' ? 'text-zinc-100' : 'text-gray-900'}`}>
+          Próximos Eventos
+        </h2>
         <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
           {upcomingItems.map((item) => (
-            <div key={item.id} className="bg-zinc-800 rounded-lg p-4 border border-zinc-700">
+            <div key={item.id} className={`rounded-lg p-4 border ${
+              theme === 'dark' ? 'bg-zinc-800 border-zinc-700' : 'bg-white border-gray-200'
+            }`}>
               <div className="flex items-start justify-between mb-3">
                 <div className={`p-2 rounded-lg ${getTypeColor(item.type)}`}>
                   {getTypeIcon(item.type)}
@@ -100,9 +110,13 @@ const Agenda: React.FC = () => {
                   {getTypeLabel(item.type)}
                 </span>
               </div>
-              <h3 className="font-semibold text-zinc-100 mb-1">{item.title}</h3>
-              <p className="text-sm text-zinc-400 mb-2">{item.description}</p>
-              <div className="space-y-1 text-sm text-zinc-400">
+              <h3 className={`font-semibold mb-1 ${theme === 'dark' ? 'text-zinc-100' : 'text-gray-900'}`}>
+                {item.title}
+              </h3>
+              <p className={`text-sm mb-2 ${theme === 'dark' ? 'text-zinc-400' : 'text-gray-600'}`}>
+                {item.description}
+              </p>
+              <div className={`space-y-1 text-sm ${theme === 'dark' ? 'text-zinc-400' : 'text-gray-600'}`}>
                 <div className="flex items-center">
                   <Calendar className="h-4 w-4 mr-1" />
                   {formatDate(item.date)}
@@ -133,7 +147,9 @@ const Agenda: React.FC = () => {
             className={`px-4 py-2 rounded-lg transition-colors ${
               filter === 'all' 
                 ? 'bg-indigo-600 text-white' 
-                : 'bg-zinc-800 text-zinc-300 hover:bg-zinc-700 border border-zinc-700'
+                : theme === 'dark'
+                  ? 'bg-zinc-800 text-zinc-300 hover:bg-zinc-700 border border-zinc-700'
+                  : 'bg-white text-gray-700 hover:bg-gray-50 border border-gray-300'
             }`}
           >
             Todos
@@ -143,7 +159,9 @@ const Agenda: React.FC = () => {
             className={`px-4 py-2 rounded-lg transition-colors ${
               filter === 'rehearsal' 
                 ? 'bg-blue-600 text-white' 
-                : 'bg-zinc-800 text-zinc-300 hover:bg-zinc-700 border border-zinc-700'
+                : theme === 'dark'
+                  ? 'bg-zinc-800 text-zinc-300 hover:bg-zinc-700 border border-zinc-700'
+                  : 'bg-white text-gray-700 hover:bg-gray-50 border border-gray-300'
             }`}
           >
             Ensaios
@@ -153,7 +171,9 @@ const Agenda: React.FC = () => {
             className={`px-4 py-2 rounded-lg transition-colors ${
               filter === 'service' 
                 ? 'bg-green-600 text-white' 
-                : 'bg-zinc-800 text-zinc-300 hover:bg-zinc-700 border border-zinc-700'
+                : theme === 'dark'
+                  ? 'bg-zinc-800 text-zinc-300 hover:bg-zinc-700 border border-zinc-700'
+                  : 'bg-white text-gray-700 hover:bg-gray-50 border border-gray-300'
             }`}
           >
             Cultos
@@ -163,7 +183,9 @@ const Agenda: React.FC = () => {
             className={`px-4 py-2 rounded-lg transition-colors ${
               filter === 'meeting' 
                 ? 'bg-orange-600 text-white' 
-                : 'bg-zinc-800 text-zinc-300 hover:bg-zinc-700 border border-zinc-700'
+                : theme === 'dark'
+                  ? 'bg-zinc-800 text-zinc-300 hover:bg-zinc-700 border border-zinc-700'
+                  : 'bg-white text-gray-700 hover:bg-gray-50 border border-gray-300'
             }`}
           >
             Reuniões
@@ -173,7 +195,9 @@ const Agenda: React.FC = () => {
             className={`px-4 py-2 rounded-lg transition-colors ${
               filter === 'event' 
                 ? 'bg-purple-600 text-white' 
-                : 'bg-zinc-800 text-zinc-300 hover:bg-zinc-700 border border-zinc-700'
+                : theme === 'dark'
+                  ? 'bg-zinc-800 text-zinc-300 hover:bg-zinc-700 border border-zinc-700'
+                  : 'bg-white text-gray-700 hover:bg-gray-50 border border-gray-300'
             }`}
           >
             Eventos
@@ -184,7 +208,9 @@ const Agenda: React.FC = () => {
         <div className="space-y-4">
           {filteredItems.length > 0 ? (
             filteredItems.map((item) => (
-              <div key={item.id} className="bg-zinc-800 rounded-lg p-6 border border-zinc-700">
+              <div key={item.id} className={`rounded-lg p-6 border ${
+                theme === 'dark' ? 'bg-zinc-800 border-zinc-700' : 'bg-white border-gray-200'
+              }`}>
                 <div className="flex items-start justify-between">
                   <div className="flex items-start space-x-4">
                     <div className={`p-3 rounded-lg ${getTypeColor(item.type)}`}>
@@ -192,13 +218,17 @@ const Agenda: React.FC = () => {
                     </div>
                     <div className="flex-1">
                       <div className="flex items-center space-x-2 mb-2">
-                        <h3 className="text-lg font-semibold text-zinc-100">{item.title}</h3>
+                        <h3 className={`text-lg font-semibold ${theme === 'dark' ? 'text-zinc-100' : 'text-gray-900'}`}>
+                          {item.title}
+                        </h3>
                         <span className={`px-2 py-1 rounded-full text-xs border ${getTypeColor(item.type)}`}>
                           {getTypeLabel(item.type)}
                         </span>
                       </div>
-                      <p className="text-zinc-400 mb-3">{item.description}</p>
-                      <div className="flex flex-wrap gap-4 text-sm text-zinc-400">
+                      <p className={`mb-3 ${theme === 'dark' ? 'text-zinc-400' : 'text-gray-600'}`}>
+                        {item.description}
+                      </p>
+                      <div className={`flex flex-wrap gap-4 text-sm ${theme === 'dark' ? 'text-zinc-400' : 'text-gray-600'}`}>
                         <div className="flex items-center">
                           <Calendar className="h-4 w-4 mr-1" />
                           {formatDate(item.date)}
@@ -223,17 +253,17 @@ const Agenda: React.FC = () => {
             ))
           ) : (
             <div className="text-center py-12">
-              <Calendar className="h-16 w-16 text-zinc-400 mx-auto mb-4" />
-              <h3 className="text-xl font-semibold text-zinc-100 mb-2">
+              <Calendar className={`h-16 w-16 mx-auto mb-4 ${theme === 'dark' ? 'text-zinc-400' : 'text-gray-400'}`} />
+              <h3 className={`text-xl font-semibold mb-2 ${theme === 'dark' ? 'text-zinc-100' : 'text-gray-900'}`}>
                 Nenhum evento encontrado
               </h3>
-              <p className="text-zinc-400 mb-6">
+              <p className={`mb-6 ${theme === 'dark' ? 'text-zinc-400' : 'text-gray-600'}`}>
                 {filter === 'all' 
                   ? 'Não há eventos na agenda ainda'
                   : `Não há eventos do tipo "${getTypeLabel(filter as AgendaItem['type'])}" na agenda`
                 }
               </p>
-              <p className="text-zinc-500">
+              <p className={theme === 'dark' ? 'text-zinc-500' : 'text-gray-500'}>
                 Os eventos são gerenciados pelo administrador
               </p>
             </div>

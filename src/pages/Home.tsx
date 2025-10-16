@@ -1,10 +1,12 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
-import { Calendar, Music, Archive, ArrowRight, Clock, Users, Guitar, Plus, Edit, Trash2 } from 'lucide-react';
+import { Calendar, Music, Archive, ArrowRight, Clock, Users, Guitar, Plus, Edit, Trash2, Crown } from 'lucide-react';
 import { useAppContext } from '../context/AppContext';
+import { useTheme } from '../context/ThemeContext';
 
 const Home: React.FC = () => {
   const { musicians, songs, agendaItems, activities } = useAppContext();
+  const { theme } = useTheme();
   const currentDate = new Date();
   const currentMonth = currentDate.toLocaleDateString('pt-BR', { month: 'long', year: 'numeric' });
 
@@ -68,12 +70,87 @@ const Home: React.FC = () => {
     <div className="space-y-8">
       {/* Header */}
       <div className="text-center">
-        <h1 className="text-4xl font-bold text-zinc-100 mb-4">
+        <h1 className={`text-4xl font-bold mb-4 ${theme === 'dark' ? 'text-zinc-100' : 'text-gray-900'}`}>
           Bem-vindo ao QG WORSHIP
         </h1>
-        <p className="text-xl text-zinc-400 max-w-2xl mx-auto">
+        <p className={`text-xl max-w-2xl mx-auto ${theme === 'dark' ? 'text-zinc-400' : 'text-gray-600'}`}>
           Ministério de Louvor - Organize suas escalas, repertórios e eventos de forma eficiente
         </p>
+      </div>
+
+      {/* Liderança do Ministério */}
+      <div className="glass p-8">
+        <div className="flex flex-col md:flex-row items-center justify-center mb-6 text-center">
+          <Crown className="h-10 w-10 text-yellow-500 md:mr-3 mb-2 md:mb-0 md:-mt-1" />
+          <h2 className={`text-2xl font-bold ${theme === 'dark' ? 'text-zinc-100' : 'text-gray-900'}`}>
+            Presidência do Ministério
+          </h2>
+        </div>
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-6 max-w-3xl mx-auto">
+          {/* Pastor Líder - Cassio Calderaro */}
+          <div className={`rounded-xl p-6 border transition-all duration-300 transform hover:-translate-y-1 ${
+            theme === 'dark'
+              ? 'bg-zinc-800 border-zinc-700 hover:border-indigo-500'
+              : 'bg-white border-gray-200 hover:border-indigo-400'
+          }`}>
+            <div className="flex flex-col items-center text-center">
+              <div className="w-32 h-32 rounded-full bg-gradient-to-br from-indigo-500 to-purple-600 flex items-center justify-center mb-4 shadow-lg overflow-hidden border-4 border-indigo-500/30">
+                <img 
+                  src="/src/assets/img/cassio.jpeg" 
+                  alt="Pastor Cassio Calderaro" 
+                  className="w-full h-full object-cover"
+                  onError={(e) => {
+                    // Fallback para placeholder caso a imagem não exista
+                    (e.target as HTMLImageElement).src = 'https://via.placeholder.com/150/4F46E5/FFFFFF?text=CC';
+                  }}
+                />
+              </div>
+              <h3 className={`text-xl font-bold mb-2 ${theme === 'dark' ? 'text-zinc-100' : 'text-gray-900'}`}>
+                Cassio Calderaro
+              </h3>
+              <div className="inline-flex items-center px-3 py-1 rounded-full bg-indigo-500/20 border border-indigo-500/50 mb-3">
+                <span className={`text-sm font-semibold ${theme === 'dark' ? 'text-indigo-400' : 'text-indigo-600'}`}>
+                  Pastor do QGW
+                </span>
+              </div>
+              <p className={`text-sm ${theme === 'dark' ? 'text-zinc-400' : 'text-gray-600'}`}>
+                Liderança do Ministério
+              </p>
+            </div>
+          </div>
+
+          {/* Líder - Vanessa Calderaro */}
+          <div className={`rounded-xl p-6 border transition-all duration-300 transform hover:-translate-y-1 ${
+            theme === 'dark'
+              ? 'bg-zinc-800 border-zinc-700 hover:border-purple-500'
+              : 'bg-white border-gray-200 hover:border-purple-400'
+          }`}>
+            <div className="flex flex-col items-center text-center">
+              <div className="w-32 h-32 rounded-full bg-gradient-to-br from-purple-500 to-pink-600 flex items-center justify-center mb-4 shadow-lg overflow-hidden border-4 border-purple-500/30">
+                <img 
+                  src="/src/assets/img/vanessa.jpeg" 
+                  alt="Vanessa Calderaro" 
+                  className="w-full h-full object-cover"
+                  onError={(e) => {
+                    // Fallback para placeholder caso a imagem não exista
+                    (e.target as HTMLImageElement).src = 'https://via.placeholder.com/150/9333EA/FFFFFF?text=VC';
+                  }}
+                />
+              </div>
+              <h3 className={`text-xl font-bold mb-2 ${theme === 'dark' ? 'text-zinc-100' : 'text-gray-900'}`}>
+                Vanessa Calderaro
+              </h3>
+              <div className="inline-flex items-center px-3 py-1 rounded-full bg-purple-500/20 border border-purple-500/50 mb-3">
+                <span className={`text-sm font-semibold ${theme === 'dark' ? 'text-purple-400' : 'text-purple-600'}`}>
+                  Líder
+                </span>
+              </div>
+              <p className={`text-sm ${theme === 'dark' ? 'text-zinc-400' : 'text-gray-600'}`}>
+                Liderança do Ministério
+              </p>
+            </div>
+          </div>
+        </div>
       </div>
 
       {/* Stats */}
@@ -83,10 +160,14 @@ const Home: React.FC = () => {
           return (
             <div key={index} className="glass p-6 text-center fade-in-up" style={{ animationDelay: `${index * 0.1}s` }}>
               <div className="flex justify-center mb-3">
-                <Icon className="h-8 w-8 text-indigo-400" />
+                <Icon className="h-8 w-8 text-indigo-500" />
               </div>
-              <div className="text-3xl font-bold text-zinc-100 mb-1">{stat.value}</div>
-              <div className="text-sm text-zinc-400">{stat.label}</div>
+              <div className={`text-3xl font-bold mb-1 ${theme === 'dark' ? 'text-zinc-100' : 'text-gray-900'}`}>
+                {stat.value}
+              </div>
+              <div className={`text-sm ${theme === 'dark' ? 'text-zinc-400' : 'text-gray-600'}`}>
+                {stat.label}
+              </div>
             </div>
           );
         })}
@@ -94,7 +175,9 @@ const Home: React.FC = () => {
 
       {/* Quick Actions */}
       <div className="glass p-8">
-        <h2 className="text-2xl font-bold text-zinc-100 mb-6">Acesso Rápido</h2>
+        <h2 className={`text-2xl font-bold mb-6 ${theme === 'dark' ? 'text-zinc-100' : 'text-gray-900'}`}>
+          Acesso Rápido
+        </h2>
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
           {quickActions.map((action, index) => {
             const Icon = action.icon;
@@ -103,21 +186,33 @@ const Home: React.FC = () => {
               <Link
                 key={index}
                 to={action.href}
-                className={`group bg-zinc-800 rounded-xl p-6 shadow-lg hover:shadow-xl transition-all duration-300 transform hover:-translate-y-1 border border-zinc-700 ${
-                  isLastItem ? 'md:col-start-1 md:col-span-2 md:max-w-md md:mx-auto' : ''
-                }`}
+                className={`group rounded-xl p-6 shadow-lg hover:shadow-xl transition-all duration-300 transform hover:-translate-y-1 border ${
+                  theme === 'dark' 
+                    ? 'bg-zinc-800 border-zinc-700' 
+                    : 'bg-white border-gray-200'
+                } ${isLastItem ? 'md:col-start-1 md:col-span-2 md:max-w-md md:mx-auto' : ''}`}
               >
                 <div className="flex items-start space-x-4">
                   <div className={`p-3 rounded-lg ${action.color} group-hover:scale-110 transition-transform duration-200`}>
                     <Icon className="h-6 w-6 text-white" />
                   </div>
                   <div className="flex-1">
-                    <h3 className="text-lg font-semibold text-zinc-100 group-hover:text-indigo-400 transition-colors">
+                    <h3 className={`text-lg font-semibold transition-colors ${
+                      theme === 'dark'
+                        ? 'text-zinc-100 group-hover:text-indigo-400'
+                        : 'text-gray-900 group-hover:text-indigo-600'
+                    }`}>
                       {action.title}
                     </h3>
-                    <p className="text-zinc-400 mt-1">{action.description}</p>
+                    <p className={`mt-1 ${theme === 'dark' ? 'text-zinc-400' : 'text-gray-600'}`}>
+                      {action.description}
+                    </p>
                   </div>
-                  <ArrowRight className="h-5 w-5 text-zinc-400 group-hover:text-indigo-400 transition-colors" />
+                  <ArrowRight className={`h-5 w-5 transition-colors ${
+                    theme === 'dark'
+                      ? 'text-zinc-400 group-hover:text-indigo-400'
+                      : 'text-gray-400 group-hover:text-indigo-600'
+                  }`} />
                 </div>
               </Link>
             );
@@ -127,7 +222,9 @@ const Home: React.FC = () => {
 
       {/* Recent Activity */}
       <div className="glass p-8">
-        <h2 className="text-2xl font-bold text-zinc-100 mb-6">Atividade Recente</h2>
+        <h2 className={`text-2xl font-bold mb-6 ${theme === 'dark' ? 'text-zinc-100' : 'text-gray-900'}`}>
+          Atividade Recente
+        </h2>
         <div className="space-y-4">
           {activities.length > 0 ? (
             activities.slice(0, 10).map((activity) => {
@@ -201,23 +298,33 @@ const Home: React.FC = () => {
               };
 
               return (
-                <div key={activity.id} className="flex items-center space-x-4 p-4 bg-zinc-800 rounded-lg border border-zinc-700">
+                <div key={activity.id} className={`flex items-center space-x-4 p-4 rounded-lg border ${
+                  theme === 'dark' 
+                    ? 'bg-zinc-800 border-zinc-700' 
+                    : 'bg-white border-gray-200'
+                }`}>
                   <div className={`p-2 rounded-lg border relative ${bgColor} ${borderColor}`}>
                     <TypeIcon className={`h-5 w-5 ${textColor}`} />
-                    <div className={`absolute -top-1 -right-1 p-0.5 bg-zinc-800 rounded-full border ${borderColor}`}>
+                    <div className={`absolute -top-1 -right-1 p-0.5 rounded-full border ${
+                      theme === 'dark' ? 'bg-zinc-800' : 'bg-white'
+                    } ${borderColor}`}>
                       <ActionIcon className={`h-3 w-3 ${textColor}`} />
                     </div>
                   </div>
                   <div className="flex-1">
-                    <p className="font-medium text-zinc-100">{activity.description}</p>
-                    <p className="text-sm text-zinc-400">{getTimeAgo(activity.timestamp)}</p>
+                    <p className={`font-medium ${theme === 'dark' ? 'text-zinc-100' : 'text-gray-900'}`}>
+                      {activity.description}
+                    </p>
+                    <p className={`text-sm ${theme === 'dark' ? 'text-zinc-400' : 'text-gray-600'}`}>
+                      {getTimeAgo(activity.timestamp)}
+                    </p>
                   </div>
                 </div>
               );
             })
           ) : (
-            <div className="text-center py-12 text-zinc-400">
-              <Clock className="h-16 w-16 mx-auto mb-4 text-zinc-600" />
+            <div className={`text-center py-12 ${theme === 'dark' ? 'text-zinc-400' : 'text-gray-600'}`}>
+              <Clock className={`h-16 w-16 mx-auto mb-4 ${theme === 'dark' ? 'text-zinc-600' : 'text-gray-400'}`} />
               <p>Nenhuma atividade registrada ainda</p>
               <p className="text-sm mt-2">As atividades aparecerão aqui quando você começar a usar o sistema</p>
             </div>

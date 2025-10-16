@@ -28,7 +28,7 @@ body {
   min-height: 100vh;
 }
 
-/* Custom scrollbar - dark */
+/* Custom scrollbar - dark mode */
 ::-webkit-scrollbar {
   width: 8px;
 }
@@ -38,21 +38,53 @@ body {
   border-radius: 10px;
 }
 
+.dark ::-webkit-scrollbar-track {
+  background: #111214;
+}
+
 ::-webkit-scrollbar-thumb {
   background: #2b2b2f;
   border-radius: 10px;
+}
+
+.dark ::-webkit-scrollbar-thumb {
+  background: #2b2b2f;
 }
 
 ::-webkit-scrollbar-thumb:hover {
   background: #3a3a3f;
 }
 
-/* Glassmorphism effect */
+.dark ::-webkit-scrollbar-thumb:hover {
+  background: #3a3a3f;
+}
+
+/* Light mode scrollbar */
+body:not(.dark) ::-webkit-scrollbar-track {
+  background: #f3f4f6;
+}
+
+body:not(.dark) ::-webkit-scrollbar-thumb {
+  background: #d1d5db;
+}
+
+body:not(.dark) ::-webkit-scrollbar-thumb:hover {
+  background: #9ca3af;
+}
+
+/* Glassmorphism effect - Dark mode */
 .glass {
   background: rgba(24, 24, 27, 0.6);
   backdrop-filter: blur(12px);
   border-radius: 12px;
   border: 1px solid rgba(63, 63, 70, 0.6);
+  transition: background 0.3s, border 0.3s;
+}
+
+/* Glassmorphism effect - Light mode */
+body:not(.dark) .glass {
+  background: rgba(255, 255, 255, 0.8);
+  border: 1px solid rgba(229, 231, 235, 0.8);
 }
 
 /* Custom animations */

@@ -15,6 +15,7 @@ import {
 import { AgendaItem, MonthSchedule, WeekSchedule } from '../types';
 import { useAppContext } from '../context/AppContext';
 import { useNotification } from '../components/Notification';
+import { useTheme } from '../context/ThemeContext';
 import { deleteDocument, upsertDocument } from '../firebase/firestore';
 import { signOut } from 'firebase/auth';
 import { auth } from '../firebase/config';
@@ -24,6 +25,7 @@ const Admin: React.FC = () => {
   const [activeTab, setActiveTab] = useState<'agenda' | 'scales' | 'repertoire' | 'settings'>('agenda');
   const { songs, musicians, schedules, agendaItems, addAgendaItem: addAgendaItemContext, updateAgendaItem, deleteAgendaItem: deleteAgendaItemContext, repertoires, addRepertoire: addRepertoireContext, updateRepertoire, deleteRepertoire: deleteRepertoireContext } = useAppContext();
   const { addNotification, showConfirm } = useNotification();
+  const { theme } = useTheme();
 
   // Estados para o formulário de escala
   const [newScale, setNewScale] = useState({
@@ -988,15 +990,23 @@ const Admin: React.FC = () => {
       <div className="glass p-4 md:p-6">
         <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
           <div className="flex items-center space-x-3 md:space-x-4">
-            <Settings className="h-6 w-6 md:h-8 md:w-8 text-indigo-400" />
+            <Settings className="h-6 w-6 md:h-8 md:w-8 text-indigo-500" />
             <div>
-              <h1 className="text-xl md:text-3xl font-bold text-zinc-100">Painel Administrativo</h1>
-              <p className="text-sm md:text-base text-zinc-400 hidden sm:block">Gerencie escalas, repertórios e eventos</p>
+              <h1 className={`text-xl md:text-3xl font-bold ${theme === 'dark' ? 'text-zinc-100' : 'text-gray-900'}`}>
+                Painel Administrativo
+              </h1>
+              <p className={`text-sm md:text-base hidden sm:block ${theme === 'dark' ? 'text-zinc-400' : 'text-gray-600'}`}>
+                Gerencie escalas, repertórios e eventos
+              </p>
             </div>
           </div>
           <button
             onClick={handleLogout}
-            className="flex items-center justify-center space-x-2 px-4 py-2 text-red-400 hover:bg-red-900/20 rounded-lg transition-colors self-start md:self-auto"
+            className={`flex items-center justify-center space-x-2 px-4 py-2 rounded-lg transition-colors self-start md:self-auto ${
+              theme === 'dark'
+                ? 'text-red-400 hover:bg-red-900/20'
+                : 'text-red-600 hover:bg-red-50'
+            }`}
           >
             <LogOut className="h-5 w-5" />
             <span>Sair</span>
@@ -1006,7 +1016,9 @@ const Admin: React.FC = () => {
 
       {/* Tabs */}
       <div className="glass p-3 md:p-6">
-        <div className="flex flex-wrap md:flex-nowrap gap-2 md:space-x-1 md:gap-0 bg-gray-100 p-1 rounded-lg">
+        <div className={`flex flex-wrap md:flex-nowrap gap-2 md:space-x-1 md:gap-0 p-1 rounded-lg ${
+          theme === 'dark' ? 'bg-zinc-900' : 'bg-gray-100'
+        }`}>
           {tabs.map((tab) => {
             const Icon = tab.icon;
             return (
@@ -1015,8 +1027,12 @@ const Admin: React.FC = () => {
                 onClick={() => setActiveTab(tab.id as any)}
                 className={`flex-1 min-w-[100px] flex items-center justify-center space-x-1 md:space-x-2 px-2 md:px-4 py-2 rounded-md transition-colors ${
                   activeTab === tab.id
+                    ? theme === 'dark'
                     ? 'bg-zinc-800 text-indigo-300 shadow-sm'
-                    : 'text-zinc-400 hover:text-zinc-200'
+                      : 'bg-indigo-500 text-white shadow-sm'
+                    : theme === 'dark'
+                      ? 'text-zinc-400 hover:text-zinc-200'
+                      : 'text-gray-600 hover:text-gray-900'
                 }`}
               >
                 <Icon className="h-4 w-4 md:h-5 md:w-5" />
@@ -1034,12 +1050,18 @@ const Admin: React.FC = () => {
         {activeTab === 'agenda' && (
           <div>
             <div className="flex items-center justify-between mb-6">
-              <h2 className="text-2xl font-bold text-zinc-100">Gerenciar Agenda</h2>
+              <h2 className={`text-2xl font-bold ${theme === 'dark' ? 'text-zinc-100' : 'text-gray-900'}`}>
+                Gerenciar Agenda
+              </h2>
             </div>
 
             {/* Formulário de Nova Agenda */}
-            <div className="mb-6 bg-zinc-800 border border-zinc-700 rounded-lg p-4 md:p-6">
-              <h3 className="text-base md:text-lg font-semibold text-zinc-100 mb-4">Novo Evento</h3>
+            <div className={`mb-6 border rounded-lg p-4 md:p-6 ${
+              theme === 'dark' ? 'bg-zinc-800 border-zinc-700' : 'bg-white border-gray-200'
+            }`}>
+              <h3 className={`text-base md:text-lg font-semibold mb-4 ${theme === 'dark' ? 'text-zinc-100' : 'text-gray-900'}`}>
+                Novo Evento
+              </h3>
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6 mb-4">
                 <div className="space-y-4">
                 <input
@@ -1047,13 +1069,21 @@ const Admin: React.FC = () => {
                     placeholder="Título do evento"
                     value={newAgendaItem.title}
                     onChange={(e) => setNewAgendaItem({ ...newAgendaItem, title: e.target.value })}
-                    className="w-full px-3 py-2 bg-zinc-900 border border-zinc-600 text-zinc-100 placeholder-zinc-500 rounded-lg focus:ring-2 focus:ring-indigo-500"
+                    className={`w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-indigo-500 ${
+                  theme === 'dark'
+                    ? 'bg-zinc-900 border-zinc-600 text-zinc-100 placeholder-zinc-500'
+                    : 'bg-gray-50 border-gray-300 text-gray-900 placeholder-gray-400'
+                }`}
                   />
                   <textarea
                     placeholder="Descrição"
                     value={newAgendaItem.description}
                     onChange={(e) => setNewAgendaItem({ ...newAgendaItem, description: e.target.value })}
-                    className="w-full px-3 py-2 bg-zinc-900 border border-zinc-600 text-zinc-100 placeholder-zinc-500 rounded-lg focus:ring-2 focus:ring-indigo-500"
+                    className={`w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-indigo-500 ${
+                  theme === 'dark'
+                    ? 'bg-zinc-900 border-zinc-600 text-zinc-100 placeholder-zinc-500'
+                    : 'bg-gray-50 border-gray-300 text-gray-900 placeholder-gray-400'
+                }`}
                     rows={3}
                   />
                   <input
@@ -1061,7 +1091,11 @@ const Admin: React.FC = () => {
                     placeholder="Local"
                     value={newAgendaItem.location}
                     onChange={(e) => setNewAgendaItem({ ...newAgendaItem, location: e.target.value })}
-                    className="w-full px-3 py-2 bg-zinc-900 border border-zinc-600 text-zinc-100 placeholder-zinc-500 rounded-lg focus:ring-2 focus:ring-indigo-500"
+                    className={`w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-indigo-500 ${
+                  theme === 'dark'
+                    ? 'bg-zinc-900 border-zinc-600 text-zinc-100 placeholder-zinc-500'
+                    : 'bg-gray-50 border-gray-300 text-gray-900 placeholder-gray-400'
+                }`}
                   />
                 </div>
                 <div className="space-y-4">
@@ -1069,18 +1103,30 @@ const Admin: React.FC = () => {
                     type="date"
                     value={newAgendaItem.date}
                     onChange={(e) => setNewAgendaItem({ ...newAgendaItem, date: e.target.value })}
-                    className="w-full px-3 py-2 bg-zinc-900 border border-zinc-600 text-zinc-100 placeholder-zinc-500 rounded-lg focus:ring-2 focus:ring-indigo-500"
+                    className={`w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-indigo-500 ${
+                  theme === 'dark'
+                    ? 'bg-zinc-900 border-zinc-600 text-zinc-100 placeholder-zinc-500'
+                    : 'bg-gray-50 border-gray-300 text-gray-900 placeholder-gray-400'
+                }`}
                   />
                   <input
                     type="time"
                     value={newAgendaItem.time}
                     onChange={(e) => setNewAgendaItem({ ...newAgendaItem, time: e.target.value })}
-                    className="w-full px-3 py-2 bg-zinc-900 border border-zinc-600 text-zinc-100 placeholder-zinc-500 rounded-lg focus:ring-2 focus:ring-indigo-500"
+                    className={`w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-indigo-500 ${
+                  theme === 'dark'
+                    ? 'bg-zinc-900 border-zinc-600 text-zinc-100 placeholder-zinc-500'
+                    : 'bg-gray-50 border-gray-300 text-gray-900 placeholder-gray-400'
+                }`}
                 />
                 <select
                     value={newAgendaItem.type}
                     onChange={(e) => setNewAgendaItem({ ...newAgendaItem, type: e.target.value as AgendaItem['type'] })}
-                    className="w-full px-3 py-2 bg-zinc-900 border border-zinc-600 text-zinc-100 placeholder-zinc-500 rounded-lg focus:ring-2 focus:ring-indigo-500"
+                    className={`w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-indigo-500 ${
+                  theme === 'dark'
+                    ? 'bg-zinc-900 border-zinc-600 text-zinc-100 placeholder-zinc-500'
+                    : 'bg-gray-50 border-gray-300 text-gray-900 placeholder-gray-400'
+                }`}
                   >
                     <option value="rehearsal">Ensaio</option>
                     <option value="service">Culto</option>
@@ -1098,11 +1144,11 @@ const Admin: React.FC = () => {
 
             {/* Lista de Eventos */}
                     <div>
-              <h3 className="text-base md:text-lg font-semibold text-zinc-100 mb-4">Eventos Cadastrados</h3>
+              <h3 className={`text-base md:text-lg font-semibold mb-4 ${theme === 'dark' ? 'text-zinc-100' : 'text-gray-900'}`}>Eventos Cadastrados</h3>
               <div className="space-y-4">
                 {agendaItems.length > 0 ? (
                   agendaItems.map((item) => (
-                    <div key={item.id} className="bg-zinc-800 rounded-lg p-4 border border-zinc-700">
+                    <div key={item.id} className={`rounded-lg p-4 border ${theme === 'dark' ? 'bg-zinc-800 border-zinc-700' : 'bg-white border-gray-200'}`}>
                       {editingAgendaId === item.id ? (
                         // Modo de edição
                         <div>
@@ -1113,13 +1159,21 @@ const Admin: React.FC = () => {
                                 placeholder="Título do evento"
                                 value={editAgendaItem.title}
                                 onChange={(e) => setEditAgendaItem({ ...editAgendaItem, title: e.target.value })}
-                                className="w-full px-3 py-2 bg-zinc-900 border border-zinc-600 text-zinc-100 placeholder-zinc-500 rounded-lg focus:ring-2 focus:ring-indigo-500"
+                                className={`w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-indigo-500 ${
+                  theme === 'dark'
+                    ? 'bg-zinc-900 border-zinc-600 text-zinc-100 placeholder-zinc-500'
+                    : 'bg-gray-50 border-gray-300 text-gray-900 placeholder-gray-400'
+                }`}
                               />
                               <textarea
                                 placeholder="Descrição"
                                 value={editAgendaItem.description}
                                 onChange={(e) => setEditAgendaItem({ ...editAgendaItem, description: e.target.value })}
-                                className="w-full px-3 py-2 bg-zinc-900 border border-zinc-600 text-zinc-100 placeholder-zinc-500 rounded-lg focus:ring-2 focus:ring-indigo-500"
+                                className={`w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-indigo-500 ${
+                  theme === 'dark'
+                    ? 'bg-zinc-900 border-zinc-600 text-zinc-100 placeholder-zinc-500'
+                    : 'bg-gray-50 border-gray-300 text-gray-900 placeholder-gray-400'
+                }`}
                                 rows={3}
                               />
                               <input
@@ -1127,7 +1181,11 @@ const Admin: React.FC = () => {
                                 placeholder="Local"
                                 value={editAgendaItem.location}
                                 onChange={(e) => setEditAgendaItem({ ...editAgendaItem, location: e.target.value })}
-                                className="w-full px-3 py-2 bg-zinc-900 border border-zinc-600 text-zinc-100 placeholder-zinc-500 rounded-lg focus:ring-2 focus:ring-indigo-500"
+                                className={`w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-indigo-500 ${
+                  theme === 'dark'
+                    ? 'bg-zinc-900 border-zinc-600 text-zinc-100 placeholder-zinc-500'
+                    : 'bg-gray-50 border-gray-300 text-gray-900 placeholder-gray-400'
+                }`}
                               />
                             </div>
                             <div className="space-y-3">
@@ -1135,18 +1193,30 @@ const Admin: React.FC = () => {
                                 type="date"
                                 value={editAgendaItem.date}
                                 onChange={(e) => setEditAgendaItem({ ...editAgendaItem, date: e.target.value })}
-                                className="w-full px-3 py-2 bg-zinc-900 border border-zinc-600 text-zinc-100 placeholder-zinc-500 rounded-lg focus:ring-2 focus:ring-indigo-500"
+                                className={`w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-indigo-500 ${
+                  theme === 'dark'
+                    ? 'bg-zinc-900 border-zinc-600 text-zinc-100 placeholder-zinc-500'
+                    : 'bg-gray-50 border-gray-300 text-gray-900 placeholder-gray-400'
+                }`}
                               />
                               <input
                                 type="time"
                                 value={editAgendaItem.time}
                                 onChange={(e) => setEditAgendaItem({ ...editAgendaItem, time: e.target.value })}
-                                className="w-full px-3 py-2 bg-zinc-900 border border-zinc-600 text-zinc-100 placeholder-zinc-500 rounded-lg focus:ring-2 focus:ring-indigo-500"
+                                className={`w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-indigo-500 ${
+                  theme === 'dark'
+                    ? 'bg-zinc-900 border-zinc-600 text-zinc-100 placeholder-zinc-500'
+                    : 'bg-gray-50 border-gray-300 text-gray-900 placeholder-gray-400'
+                }`}
                               />
                               <select
                                 value={editAgendaItem.type}
                                 onChange={(e) => setEditAgendaItem({ ...editAgendaItem, type: e.target.value as AgendaItem['type'] })}
-                                className="w-full px-3 py-2 bg-zinc-900 border border-zinc-600 text-zinc-100 placeholder-zinc-500 rounded-lg focus:ring-2 focus:ring-indigo-500"
+                                className={`w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-indigo-500 ${
+                  theme === 'dark'
+                    ? 'bg-zinc-900 border-zinc-600 text-zinc-100 placeholder-zinc-500'
+                    : 'bg-gray-50 border-gray-300 text-gray-900 placeholder-gray-400'
+                }`}
                               >
                                 <option value="rehearsal">Ensaio</option>
                                 <option value="service">Culto</option>
@@ -1160,7 +1230,11 @@ const Admin: React.FC = () => {
                               <Save className="h-4 w-4 mr-2" />
                               Salvar
                             </button>
-                            <button onClick={cancelEditAgenda} className="px-4 py-2 bg-zinc-700 text-zinc-300 rounded-lg hover:bg-zinc-600 transition-colors flex-1 sm:flex-initial">
+                            <button onClick={cancelEditAgenda} className={`px-4 py-2 rounded-lg transition-colors flex-1 sm:flex-initial ${
+                              theme === 'dark'
+                                ? 'bg-zinc-700 text-zinc-300 hover:bg-zinc-600'
+                                : 'bg-gray-200 text-gray-900 hover:bg-gray-300'
+                            }`}>
                               Cancelar
                             </button>
                           </div>
@@ -1169,9 +1243,13 @@ const Admin: React.FC = () => {
                         // Modo de visualização
                         <div className="flex flex-col sm:flex-row sm:items-start justify-between gap-3">
                           <div className="flex-1">
-                            <h3 className="font-semibold text-zinc-100 text-base md:text-lg">{item.title}</h3>
-                            <p className="text-zinc-400 text-sm mb-2">{item.description}</p>
-                            <div className="flex flex-wrap items-center gap-2 md:gap-4 text-xs md:text-sm text-zinc-400">
+                            <h3 className={`font-semibold text-base md:text-lg ${theme === 'dark' ? 'text-zinc-100' : 'text-gray-900'}`}>
+                              {item.title}
+                            </h3>
+                            <p className={`text-sm mb-2 ${theme === 'dark' ? 'text-zinc-400' : 'text-gray-600'}`}>
+                              {item.description}
+                            </p>
+                            <div className={`flex flex-wrap items-center gap-2 md:gap-4 text-xs md:text-sm ${theme === 'dark' ? 'text-zinc-400' : 'text-gray-600'}`}>
                               <span>📅 {new Date(item.date).toLocaleDateString('pt-BR')}</span>
                               {item.time && <span>🕐 {item.time}</span>}
                               {item.location && <span>📍 {item.location}</span>}
@@ -1190,13 +1268,21 @@ const Admin: React.FC = () => {
                           <div className="flex items-center space-x-2">
                     <button
                               onClick={() => startEditAgenda(item)}
-                              className="p-2 text-blue-400 hover:bg-blue-900/20 rounded-lg transition-colors"
+                              className={`p-2 rounded-lg transition-colors ${
+                                theme === 'dark'
+                                  ? 'text-blue-400 hover:bg-blue-900/20'
+                                  : 'text-blue-600 hover:bg-blue-50'
+                              }`}
                             >
                               <Edit className="h-4 w-4" />
                             </button>
                             <button
                               onClick={() => handleDeleteAgenda(item.id)}
-                              className="p-2 text-red-400 hover:bg-red-900/20 rounded-lg transition-colors"
+                              className={`p-2 rounded-lg transition-colors ${
+                                theme === 'dark'
+                                  ? 'text-red-400 hover:bg-red-900/20'
+                                  : 'text-red-600 hover:bg-red-50'
+                              }`}
                     >
                       <Trash2 className="h-4 w-4" />
                     </button>
@@ -1206,7 +1292,7 @@ const Admin: React.FC = () => {
                     </div>
                   ))
                 ) : (
-                  <div className="text-center py-12 text-zinc-400">
+                  <div className={`text-center py-12 ${theme === 'dark' ? 'text-zinc-400' : 'text-gray-600'}`}>
                     <Calendar className="h-16 w-16 mx-auto mb-4 text-zinc-600" />
                     <p>Nenhum evento cadastrado ainda.</p>
                   </div>
@@ -1220,7 +1306,7 @@ const Admin: React.FC = () => {
         {activeTab === 'scales' && (
           <div>
             <div className="flex items-center justify-between mb-6">
-                  <h2 className="text-xl md:text-2xl font-bold text-zinc-100">Gerenciar Escalas</h2>
+                  <h2 className={`text-xl md:text-2xl font-bold ${theme === 'dark' ? 'text-zinc-100' : 'text-gray-900'}`}>Gerenciar Escalas</h2>
             </div>
 
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6 mb-6">
@@ -1236,13 +1322,21 @@ const Admin: React.FC = () => {
                       month: parseInt(month) - 1
                     }));
                   }}
-                  className="w-full px-3 py-2 bg-zinc-800 border border-zinc-700 text-zinc-100 placeholder-zinc-500 rounded-lg focus:ring-2 focus:ring-indigo-500"
+                  className={`w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-indigo-500 ${
+                    theme === 'dark'
+                      ? 'bg-zinc-800 border-zinc-700 text-zinc-100'
+                      : 'bg-gray-50 border-gray-300 text-gray-900'
+                  }`}
                 />
                 <input
                   type="date"
                   value={newScale.date}
                   onChange={(e) => setNewScale(prev => ({ ...prev, date: e.target.value }))}
-                  className="w-full px-3 py-2 bg-zinc-800 border border-zinc-700 text-zinc-100 placeholder-zinc-500 rounded-lg focus:ring-2 focus:ring-indigo-500"
+                  className={`w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-indigo-500 ${
+                    theme === 'dark'
+                      ? 'bg-zinc-800 border-zinc-700 text-zinc-100'
+                      : 'bg-gray-50 border-gray-300 text-gray-900'
+                  }`}
                 />
                       <select 
                         value={showCustomServiceName ? 'Outro' : newScale.serviceName}
@@ -1256,7 +1350,11 @@ const Admin: React.FC = () => {
                             setNewScale(prev => ({ ...prev, serviceName: e.target.value }));
                           }
                         }}
-                        className="w-full px-3 py-2 bg-zinc-800 border border-zinc-700 text-zinc-100 placeholder-zinc-500 rounded-lg focus:ring-2 focus:ring-indigo-500"
+                        className={`w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-indigo-500 ${
+                          theme === 'dark'
+                            ? 'bg-zinc-800 border-zinc-700 text-zinc-100'
+                            : 'bg-gray-50 border-gray-300 text-gray-900'
+                        }`}
                       >
                         <option value="">Selecione o tipo de culto</option>
                         <option value="Culto Manhã">Culto Manhã</option>
@@ -1273,14 +1371,22 @@ const Admin: React.FC = () => {
                             setCustomServiceName(e.target.value);
                             setNewScale(prev => ({ ...prev, serviceName: e.target.value }));
                           }}
-                          className="w-full px-3 py-2 bg-zinc-800 border border-zinc-700 text-zinc-100 placeholder-zinc-500 rounded-lg focus:ring-2 focus:ring-indigo-500 mt-2"
+                          className={`w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-indigo-500 mt-2 ${
+                            theme === 'dark'
+                              ? 'bg-zinc-800 border-zinc-700 text-zinc-100 placeholder-zinc-500'
+                              : 'bg-gray-50 border-gray-300 text-gray-900 placeholder-gray-400'
+                          }`}
                           autoFocus
                         />
                       )}
                 <select 
                   value={newScale.weekNumber}
                   onChange={(e) => setNewScale(prev => ({ ...prev, weekNumber: parseInt(e.target.value) }))}
-                  className="w-full px-3 py-2 bg-zinc-800 border border-zinc-700 text-zinc-100 placeholder-zinc-500 rounded-lg focus:ring-2 focus:ring-indigo-500"
+                  className={`w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-indigo-500 ${
+                    theme === 'dark'
+                      ? 'bg-zinc-800 border-zinc-700 text-zinc-100'
+                      : 'bg-gray-50 border-gray-300 text-gray-900'
+                  }`}
                 >
                   <option value="1">Semana 1</option>
                   <option value="2">Semana 2</option>
@@ -1290,7 +1396,7 @@ const Admin: React.FC = () => {
               </div>
               <div className="space-y-4">
                 <div>
-                  <label className="block text-sm font-medium text-zinc-300 mb-2">
+                  <label className={`block text-sm font-medium mb-2 ${theme === 'dark' ? 'text-zinc-300' : 'text-gray-700'}`}>
                     Colaboradores ({newScale.selectedMusicians.length} selecionados)
                   </label>
                   <div className="space-y-4 max-h-60 overflow-y-auto pr-2">
@@ -1298,7 +1404,7 @@ const Admin: React.FC = () => {
                       <>
                         {/* Músicos */}
                         <div>
-                          <h4 className="text-sm font-semibold text-indigo-300 mb-2">Músicos</h4>
+                          <h4 className={`text-sm font-semibold mb-2 ${theme === 'dark' ? 'text-indigo-300' : 'text-indigo-600'}`}>Músicos</h4>
                           <div className="space-y-2">
                             {musicians.filter(m => m.instrument !== 'Vocal' && m.instrument !== 'Técnico de Som').map((musician) => (
                               <label key={musician.id} className="flex items-center">
@@ -1308,7 +1414,7 @@ const Admin: React.FC = () => {
                                   onChange={() => handleMusicianToggle(musician.id)}
                                   className="mr-2" 
                                 />
-                                <span className="text-zinc-300">{musician.name} - {musician.instrument}</span>
+                                <span className={theme === 'dark' ? 'text-zinc-300' : 'text-gray-700'}>{musician.name} - {musician.instrument}</span>
                               </label>
                             ))}
                           </div>
@@ -1316,7 +1422,7 @@ const Admin: React.FC = () => {
 
                         {/* Cantores */}
                         <div>
-                          <h4 className="text-sm font-semibold text-pink-300 mb-2">Cantores</h4>
+                          <h4 className={`text-sm font-semibold mb-2 ${theme === 'dark' ? 'text-pink-300' : 'text-pink-600'}`}>Cantores</h4>
                           <div className="space-y-2">
                             {musicians.filter(m => m.instrument === 'Vocal').map((musician) => (
                               <label key={musician.id} className="flex items-center">
@@ -1326,7 +1432,7 @@ const Admin: React.FC = () => {
                                   onChange={() => handleMusicianToggle(musician.id)}
                                   className="mr-2" 
                                 />
-                                <span className="text-zinc-300">{musician.name} - {musician.instrument}</span>
+                                <span className={theme === 'dark' ? 'text-zinc-300' : 'text-gray-700'}>{musician.name} - {musician.instrument}</span>
                               </label>
                             ))}
                           </div>
@@ -1334,7 +1440,7 @@ const Admin: React.FC = () => {
 
                         {/* Técnicos de Som */}
                         <div>
-                          <h4 className="text-sm font-semibold text-yellow-300 mb-2">Técnicos de Som</h4>
+                          <h4 className={`text-sm font-semibold mb-2 ${theme === 'dark' ? 'text-yellow-300' : 'text-yellow-600'}`}>Técnicos de Som</h4>
                           <div className="space-y-2">
                             {musicians.filter(m => m.instrument === 'Técnico de Som').map((musician) => (
                               <label key={musician.id} className="flex items-center">
@@ -1344,14 +1450,14 @@ const Admin: React.FC = () => {
                                   onChange={() => handleMusicianToggle(musician.id)}
                                   className="mr-2" 
                                 />
-                                <span className="text-zinc-300">{musician.name} - {musician.instrument}</span>
+                                <span className={theme === 'dark' ? 'text-zinc-300' : 'text-gray-700'}>{musician.name} - {musician.instrument}</span>
                               </label>
                             ))}
                           </div>
                         </div>
                       </>
                     ) : (
-                      <p className="text-zinc-400">Nenhum colaborador cadastrado</p>
+                      <p className={theme === 'dark' ? 'text-zinc-400' : 'text-gray-600'}>Nenhum colaborador cadastrado</p>
                     )}
                   </div>
                 </div>
@@ -1368,8 +1474,10 @@ const Admin: React.FC = () => {
 
             {/* Formulário de Edição */}
             {editingWeek && (
-              <div className="bg-zinc-800 border border-zinc-700 rounded-lg p-6 mb-6">
-                <h3 className="text-xl font-bold text-zinc-100 mb-4">Editar Escala</h3>
+              <div className={`border rounded-lg p-6 mb-6 ${theme === 'dark' ? 'bg-zinc-800 border-zinc-700' : 'bg-white border-gray-200'}`}>
+                <h3 className={`text-xl font-bold mb-4 ${theme === 'dark' ? 'text-zinc-100' : 'text-gray-900'}`}>
+                  Editar Escala
+                </h3>
                 <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-6">
                   <div className="space-y-4">
                     <input
@@ -1383,13 +1491,21 @@ const Admin: React.FC = () => {
                           month: parseInt(month) - 1
                         }));
                       }}
-                      className="w-full px-3 py-2 bg-zinc-800 border border-zinc-700 text-zinc-100 placeholder-zinc-500 rounded-lg focus:ring-2 focus:ring-indigo-500"
+                      className={`w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-indigo-500 ${
+                        theme === 'dark'
+                          ? 'bg-zinc-800 border-zinc-700 text-zinc-100'
+                          : 'bg-gray-50 border-gray-300 text-gray-900'
+                      }`}
                     />
                     <input
                       type="date"
                       value={editScale.date}
                       onChange={(e) => setEditScale(prev => ({ ...prev, date: e.target.value }))}
-                      className="w-full px-3 py-2 bg-zinc-800 border border-zinc-700 text-zinc-100 placeholder-zinc-500 rounded-lg focus:ring-2 focus:ring-indigo-500"
+                      className={`w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-indigo-500 ${
+                        theme === 'dark'
+                          ? 'bg-zinc-800 border-zinc-700 text-zinc-100'
+                          : 'bg-gray-50 border-gray-300 text-gray-900'
+                      }`}
                     />
                     <select 
                       value={showEditCustomServiceName ? 'Outro' : editScale.serviceName}
@@ -1403,7 +1519,11 @@ const Admin: React.FC = () => {
                           setEditScale(prev => ({ ...prev, serviceName: e.target.value }));
                         }
                       }}
-                      className="w-full px-3 py-2 bg-zinc-800 border border-zinc-700 text-zinc-100 placeholder-zinc-500 rounded-lg focus:ring-2 focus:ring-indigo-500"
+                      className={`w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-indigo-500 ${
+                        theme === 'dark'
+                          ? 'bg-zinc-800 border-zinc-700 text-zinc-100'
+                          : 'bg-gray-50 border-gray-300 text-gray-900'
+                      }`}
                     >
                       <option value="">Selecione o tipo de culto</option>
                       <option value="Culto Manhã">Culto Manhã</option>
@@ -1420,14 +1540,22 @@ const Admin: React.FC = () => {
                           setEditCustomServiceName(e.target.value);
                           setEditScale(prev => ({ ...prev, serviceName: e.target.value }));
                         }}
-                        className="w-full px-3 py-2 bg-zinc-800 border border-zinc-700 text-zinc-100 placeholder-zinc-500 rounded-lg focus:ring-2 focus:ring-indigo-500 mt-2"
+                        className={`w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-indigo-500 mt-2 ${
+                          theme === 'dark'
+                            ? 'bg-zinc-800 border-zinc-700 text-zinc-100 placeholder-zinc-500'
+                            : 'bg-gray-50 border-gray-300 text-gray-900 placeholder-gray-400'
+                        }`}
                         autoFocus
                       />
                     )}
                     <select 
                       value={editScale.weekNumber}
                       onChange={(e) => setEditScale(prev => ({ ...prev, weekNumber: parseInt(e.target.value) }))}
-                      className="w-full px-3 py-2 bg-zinc-800 border border-zinc-700 text-zinc-100 placeholder-zinc-500 rounded-lg focus:ring-2 focus:ring-indigo-500"
+                      className={`w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-indigo-500 ${
+                        theme === 'dark'
+                          ? 'bg-zinc-800 border-zinc-700 text-zinc-100'
+                          : 'bg-gray-50 border-gray-300 text-gray-900'
+                      }`}
                     >
                       <option value="1">Semana 1</option>
                       <option value="2">Semana 2</option>
@@ -1437,7 +1565,7 @@ const Admin: React.FC = () => {
                     </div>
                   <div className="space-y-4">
                     <div>
-                      <label className="block text-sm font-medium text-zinc-300 mb-2">
+                      <label className={`block text-sm font-medium mb-2 ${theme === 'dark' ? 'text-zinc-300' : 'text-gray-700'}`}>
                         Colaboradores ({editScale.selectedMusicians.length} selecionados)
                       </label>
                       <div className="space-y-4 max-h-60 overflow-y-auto pr-2">
@@ -1445,7 +1573,7 @@ const Admin: React.FC = () => {
                           <>
                             {/* Músicos */}
                             <div>
-                              <h4 className="text-sm font-semibold text-indigo-300 mb-2">Músicos</h4>
+                              <h4 className={`text-sm font-semibold mb-2 ${theme === 'dark' ? 'text-indigo-300' : 'text-indigo-600'}`}>Músicos</h4>
                               <div className="space-y-2">
                                 {musicians.filter(m => m.instrument !== 'Vocal' && m.instrument !== 'Técnico de Som').map((musician) => (
                                   <label key={musician.id} className="flex items-center">
@@ -1462,7 +1590,7 @@ const Admin: React.FC = () => {
                                       }}
                                       className="mr-2" 
                                     />
-                                    <span className="text-zinc-300">{musician.name} - {musician.instrument}</span>
+                                    <span className={theme === 'dark' ? 'text-zinc-300' : 'text-gray-700'}>{musician.name} - {musician.instrument}</span>
                                   </label>
                                 ))}
                               </div>
@@ -1470,7 +1598,7 @@ const Admin: React.FC = () => {
 
                             {/* Cantores */}
                             <div>
-                              <h4 className="text-sm font-semibold text-pink-300 mb-2">Cantores</h4>
+                              <h4 className={`text-sm font-semibold mb-2 ${theme === 'dark' ? 'text-pink-300' : 'text-pink-600'}`}>Cantores</h4>
                               <div className="space-y-2">
                                 {musicians.filter(m => m.instrument === 'Vocal').map((musician) => (
                                   <label key={musician.id} className="flex items-center">
@@ -1487,7 +1615,7 @@ const Admin: React.FC = () => {
                                       }}
                                       className="mr-2" 
                                     />
-                                    <span className="text-zinc-300">{musician.name} - {musician.instrument}</span>
+                                    <span className={theme === 'dark' ? 'text-zinc-300' : 'text-gray-700'}>{musician.name} - {musician.instrument}</span>
                                   </label>
                                 ))}
                               </div>
@@ -1495,7 +1623,7 @@ const Admin: React.FC = () => {
 
                             {/* Técnicos de Som */}
                             <div>
-                              <h4 className="text-sm font-semibold text-yellow-300 mb-2">Técnicos de Som</h4>
+                              <h4 className={`text-sm font-semibold mb-2 ${theme === 'dark' ? 'text-yellow-300' : 'text-yellow-600'}`}>Técnicos de Som</h4>
                               <div className="space-y-2">
                                 {musicians.filter(m => m.instrument === 'Técnico de Som').map((musician) => (
                                   <label key={musician.id} className="flex items-center">
@@ -1512,14 +1640,14 @@ const Admin: React.FC = () => {
                                       }}
                                       className="mr-2" 
                                     />
-                                    <span className="text-zinc-300">{musician.name} - {musician.instrument}</span>
+                                    <span className={theme === 'dark' ? 'text-zinc-300' : 'text-gray-700'}>{musician.name} - {musician.instrument}</span>
                                   </label>
                                 ))}
                               </div>
                             </div>
                           </>
                         ) : (
-                          <p className="text-zinc-400">Nenhum colaborador cadastrado</p>
+                          <p className={theme === 'dark' ? 'text-zinc-400' : 'text-gray-600'}>Nenhum colaborador cadastrado</p>
                         )}
                       </div>
                     </div>
@@ -1535,7 +1663,7 @@ const Admin: React.FC = () => {
                   </button>
                   <button 
                     onClick={cancelEditWeek}
-                    className="px-4 py-2 bg-zinc-700 hover:bg-zinc-600 text-zinc-100 rounded-lg transition-colors"
+                    className={`px-4 py-2 rounded-lg transition-colors ${theme === 'dark' ? 'bg-zinc-700 hover:bg-zinc-600 text-zinc-100' : 'bg-gray-200 hover:bg-gray-300 text-gray-900'}`}
                   >
                     Cancelar
                   </button>
@@ -1546,38 +1674,52 @@ const Admin: React.FC = () => {
             {/* Escalas Existentes */}
             {schedules.length > 0 && (
               <div className="mt-8">
-                <h3 className="text-base md:text-xl font-bold text-zinc-100 mb-4">Escalas Cadastradas</h3>
+                <h3 className={`text-base md:text-xl font-bold mb-4 ${theme === 'dark' ? 'text-zinc-100' : 'text-gray-900'}`}>
+                  Escalas Cadastradas
+                </h3>
                 <div className="space-y-4">
                   {schedules.map((schedule) => (
-                    <div key={schedule.id} className="bg-zinc-800 border border-zinc-700 rounded-lg p-4">
-                      <h4 className="text-lg font-semibold text-zinc-100 mb-3">
+                    <div key={schedule.id} className={`border rounded-lg p-4 ${theme === 'dark' ? 'bg-zinc-800 border-zinc-700' : 'bg-white border-gray-200'}`}>
+                      <h4 className={`text-lg font-semibold mb-3 ${theme === 'dark' ? 'text-zinc-100' : 'text-gray-900'}`}>
                         {new Date(schedule.year, schedule.month).toLocaleDateString('pt-BR', { month: 'long', year: 'numeric' })}
                       </h4>
                       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
                         {schedule.weeks.map((week) => (
-                          <div key={week.id} className="bg-zinc-700 border border-zinc-600 rounded-lg p-3">
+                          <div key={week.id} className={`border rounded-lg p-3 ${theme === 'dark' ? 'bg-zinc-700 border-zinc-600' : 'bg-gray-50 border-gray-200'}`}>
                             <div className="flex items-center justify-between mb-2">
-                              <h5 className="text-sm font-semibold text-zinc-100">
+                              <h5 className={`text-sm font-semibold ${theme === 'dark' ? 'text-zinc-100' : 'text-gray-900'}`}>
                                 {week.weekNumber}ª Semana
                               </h5>
                               <div className="flex space-x-1">
                                 <button
                                   onClick={() => moveWeekUp(week.id)}
-                                  className="text-green-400 hover:text-green-300 transition-colors"
+                                  className={`transition-colors ${
+                                    theme === 'dark'
+                                      ? 'text-green-400 hover:text-green-300'
+                                      : 'text-green-600 hover:text-green-700'
+                                  }`}
                                   title="Mover para cima"
                                 >
                                   <ChevronUp className="h-4 w-4" />
                                 </button>
                                 <button
                                   onClick={() => moveWeekDown(week.id)}
-                                  className="text-green-400 hover:text-green-300 transition-colors"
+                                  className={`transition-colors ${
+                                    theme === 'dark'
+                                      ? 'text-green-400 hover:text-green-300'
+                                      : 'text-green-600 hover:text-green-700'
+                                  }`}
                                   title="Mover para baixo"
                                 >
                                   <ChevronDown className="h-4 w-4" />
                                 </button>
                                 <button
                                   onClick={() => startEditWeek(week.id)}
-                                  className="text-indigo-400 hover:text-indigo-300 transition-colors"
+                                  className={`transition-colors ${
+                                    theme === 'dark'
+                                      ? 'text-indigo-400 hover:text-indigo-300'
+                                      : 'text-indigo-600 hover:text-indigo-700'
+                                  }`}
                                   title="Editar escala"
                                 >
                                   <Edit className="h-4 w-4" />
@@ -1589,7 +1731,11 @@ const Admin: React.FC = () => {
                                     console.log('Week:', week);
                                     deleteWeek(week.id);
                                   }}
-                                  className="text-red-400 hover:text-red-300 transition-colors"
+                                  className={`transition-colors ${
+                                    theme === 'dark'
+                                      ? 'text-red-400 hover:text-red-300'
+                                      : 'text-red-600 hover:text-red-700'
+                                  }`}
                                   title="Excluir escala"
                                 >
                                   <Trash2 className="h-4 w-4" />
@@ -1597,24 +1743,58 @@ const Admin: React.FC = () => {
                   </div>
                             </div>
                             {week.serviceName && (
-                              <div className={`text-xs font-semibold mb-2 px-2 py-1 rounded-full ${
-                                week.serviceName === 'Culto Manhã' 
-                                  ? 'bg-orange-900/40 text-orange-300 border border-orange-800' 
+                              <div className={`text-xs font-semibold mb-2 px-2 py-1 rounded-full border ${
+                                theme === 'dark'
+                                  ? week.serviceName === 'Culto Manhã' 
+                                    ? 'bg-orange-900/40 text-orange-300 border-orange-800' 
                                   : week.serviceName === 'Culto Noite'
-                                  ? 'bg-blue-900/40 text-blue-300 border border-blue-800'
+                                    ? 'bg-blue-900/40 text-blue-300 border-blue-800'
                                   : week.serviceName === 'Culto de Terça'
-                                  ? 'bg-purple-900/40 text-purple-300 border border-purple-800'
-                                  : 'bg-gray-900/40 text-gray-300 border border-gray-800'
+                                    ? 'bg-purple-900/40 text-purple-300 border-purple-800'
+                                    : 'bg-gray-900/40 text-gray-300 border-gray-800'
+                                  : week.serviceName === 'Culto Manhã'
+                                    ? 'bg-orange-100 text-orange-700 border-orange-300'
+                                    : week.serviceName === 'Culto Noite'
+                                    ? 'bg-blue-100 text-blue-700 border-blue-300'
+                                    : week.serviceName === 'Culto de Terça'
+                                    ? 'bg-purple-100 text-purple-700 border-purple-300'
+                                    : 'bg-gray-100 text-gray-700 border-gray-300'
                               }`}>
                                 {week.serviceName}
                               </div>
                             )}
                             <div className="space-y-1">
-                              {week.musicians.map((musician) => (
-                                <div key={musician.id} className="text-xs text-zinc-400">
+                              {(() => {
+                                // Ordenar: Vocais primeiro, depois banda na ordem específica
+                                const vocals = week.musicians.filter(m => m.instrument === 'Vocal');
+                                const band = week.musicians.filter(m => m.instrument !== 'Vocal');
+                                
+                                // Ordem dos instrumentos
+                                const instrumentOrder = ['Teclado', 'Guitarra', 'Baixo', 'Bateria', 'Violão', 'Técnico de Som'];
+                                
+                                // Ordenar banda pela ordem definida
+                                const sortedBand = band.sort((a, b) => {
+                                  const indexA = instrumentOrder.indexOf(a.instrument);
+                                  const indexB = instrumentOrder.indexOf(b.instrument);
+                                  
+                                  // Se ambos estão na lista, ordenar pela posição
+                                  if (indexA !== -1 && indexB !== -1) return indexA - indexB;
+                                  // Se só A está na lista, A vem primeiro
+                                  if (indexA !== -1) return -1;
+                                  // Se só B está na lista, B vem primeiro
+                                  if (indexB !== -1) return 1;
+                                  // Se nenhum está na lista, manter ordem alfabética
+                                  return a.instrument.localeCompare(b.instrument);
+                                });
+                                
+                                const orderedMusicians = [...vocals, ...sortedBand];
+                                
+                                return orderedMusicians.map((musician) => (
+                                  <div key={musician.id} className={`text-xs ${theme === 'dark' ? 'text-zinc-400' : 'text-gray-600'}`}>
                                   {musician.instrument}: {musician.name}
                                 </div>
-                              ))}
+                                ));
+                              })()}
                             </div>
                           </div>
                         ))}
@@ -1631,83 +1811,117 @@ const Admin: React.FC = () => {
         {activeTab === 'repertoire' && (
           <div>
             <div className="flex items-center justify-between mb-6">
-              <h2 className="text-xl md:text-2xl font-bold text-zinc-100">Gerenciar Repertório</h2>
+              <h2 className={`text-xl md:text-2xl font-bold ${theme === 'dark' ? 'text-zinc-100' : 'text-gray-900'}`}>Gerenciar Repertório</h2>
             </div>
 
             {/* Formulário de Novo Repertório */}
-            <div className="mb-6 bg-zinc-800 border border-zinc-700 rounded-lg p-4 md:p-6">
-              <h3 className="text-base md:text-lg font-semibold text-zinc-100 mb-4">Novo Repertório</h3>
+            <div className={`mb-6 border rounded-lg p-4 md:p-6 ${theme === 'dark' ? 'bg-zinc-800 border-zinc-700' : 'bg-white border-gray-200'}`}>
+              <h3 className={`text-base md:text-lg font-semibold mb-4 ${theme === 'dark' ? 'text-zinc-100' : 'text-gray-900'}`}>Novo Repertório</h3>
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6 mb-4">
                 <div className="space-y-4">
                   <div>
-                    <label className="block text-sm font-medium text-zinc-300 mb-2">Nome do Repertório *</label>
+                    <label className={`block text-sm font-medium mb-2 ${theme === 'dark' ? 'text-zinc-300' : 'text-gray-700'}`}>Nome do Repertório *</label>
                     <input
                       type="text"
                       placeholder="Ex: Culto de Celebração, Louvor da Manhã..."
                       value={newRepertoire.title}
                       onChange={(e) => setNewRepertoire({ ...newRepertoire, title: e.target.value })}
-                      className="w-full px-3 py-2 bg-zinc-900 border border-zinc-600 text-zinc-100 placeholder-zinc-500 rounded-lg focus:ring-2 focus:ring-indigo-500"
+                      className={`w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-indigo-500 ${
+                  theme === 'dark'
+                    ? 'bg-zinc-900 border-zinc-600 text-zinc-100 placeholder-zinc-500'
+                    : 'bg-gray-50 border-gray-300 text-gray-900 placeholder-gray-400'
+                }`}
                     />
                   </div>
                   <div>
-                    <label className="block text-sm font-medium text-zinc-300 mb-2">Data do Culto *</label>
+                    <label className={`block text-sm font-medium mb-2 ${theme === 'dark' ? 'text-zinc-300' : 'text-gray-700'}`}>Data do Culto *</label>
                     <input
                       type="date"
                       value={newRepertoire.weekDate}
                       onChange={(e) => setNewRepertoire({ ...newRepertoire, weekDate: e.target.value })}
-                      className="w-full px-3 py-2 bg-zinc-900 border border-zinc-600 text-zinc-100 placeholder-zinc-500 rounded-lg focus:ring-2 focus:ring-indigo-500"
+                      className={`w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-indigo-500 ${
+                  theme === 'dark'
+                    ? 'bg-zinc-900 border-zinc-600 text-zinc-100 placeholder-zinc-500'
+                    : 'bg-gray-50 border-gray-300 text-gray-900 placeholder-gray-400'
+                }`}
                     />
                   </div>
                   <div>
-                    <label className="block text-sm font-medium text-zinc-300 mb-2">Link da Playlist (YouTube)</label>
+                    <label className={`block text-sm font-medium mb-2 ${theme === 'dark' ? 'text-zinc-300' : 'text-gray-700'}`}>Link da Playlist (YouTube)</label>
                     <input
                       type="url"
                       placeholder="https://youtube.com/playlist?list=..."
                       value={newRepertoire.playlistUrl}
                       onChange={(e) => setNewRepertoire({ ...newRepertoire, playlistUrl: e.target.value })}
-                      className="w-full px-3 py-2 bg-zinc-900 border border-zinc-600 text-zinc-100 placeholder-zinc-500 rounded-lg focus:ring-2 focus:ring-indigo-500"
+                      className={`w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-indigo-500 ${
+                  theme === 'dark'
+                    ? 'bg-zinc-900 border-zinc-600 text-zinc-100 placeholder-zinc-500'
+                    : 'bg-gray-50 border-gray-300 text-gray-900 placeholder-gray-400'
+                }`}
                     />
                   </div>
                 </div>
                 <div className="space-y-4">
                   <div>
-                    <label className="block text-sm font-medium text-zinc-300 mb-2">
+                    <label className={`block text-sm font-medium mb-2 ${theme === 'dark' ? 'text-zinc-300' : 'text-gray-700'}`}>
                       Músicas do Repertório * ({newRepertoire.repertoireSongs.length})
                     </label>
-                    <div className="space-y-2 max-h-60 overflow-y-auto pr-2 bg-zinc-900 border border-zinc-600 rounded-lg p-3">
+                    <div className={`space-y-2 max-h-60 overflow-y-auto pr-2 border rounded-lg p-3 ${
+                      theme === 'dark' ? 'bg-zinc-900 border-zinc-600' : 'bg-gray-50 border-gray-300'
+                    }`}>
                       {newRepertoire.repertoireSongs.length > 0 ? (
                         newRepertoire.repertoireSongs.map((repSong, index) => (
-                          <div key={repSong.id} className="flex items-start justify-between bg-zinc-800 p-3 rounded-lg">
+                          <div key={repSong.id} className={`flex items-start justify-between p-3 rounded-lg ${
+                            theme === 'dark' ? 'bg-zinc-800' : 'bg-white border border-gray-200'
+                          }`}>
                             <div className="flex-1">
                               <div className="flex items-center space-x-2 mb-1">
-                                <span className="px-2 py-0.5 bg-indigo-900/40 text-indigo-300 border border-indigo-800 rounded text-xs font-semibold">
+                                <span className={`px-2 py-0.5 border rounded text-xs font-semibold ${
+                                  theme === 'dark'
+                                    ? 'bg-indigo-900/40 text-indigo-300 border-indigo-800'
+                                    : 'bg-indigo-500 text-white border-indigo-600'
+                                }`}>
                                   #{index + 1}
                                 </span>
                                 {repSong.moment && (
-                                  <span className="px-2 py-0.5 bg-green-900/40 text-green-300 border border-green-800 rounded text-xs">
+                                  <span className={`px-2 py-0.5 border rounded text-xs ${
+                                    theme === 'dark'
+                                      ? 'bg-green-900/40 text-green-300 border-green-800'
+                                      : 'bg-green-500 text-white border-green-600'
+                                  }`}>
                                     {repSong.moment}
                                   </span>
                                 )}
                                 {repSong.isMedley && (
-                                  <span className="px-2 py-0.5 bg-purple-900/40 text-purple-300 border border-purple-800 rounded text-xs">
+                                  <span className={`px-2 py-0.5 border rounded text-xs ${
+                                    theme === 'dark'
+                                      ? 'bg-purple-900/40 text-purple-300 border-purple-800'
+                                      : 'bg-purple-500 text-white border-purple-600'
+                                  }`}>
                                     Medley
                                   </span>
                                 )}
                                 {repSong.isInstrumental && (
-                                  <span className="px-2 py-0.5 bg-amber-900/40 text-amber-300 border border-amber-800 rounded text-xs">
+                                  <span className={`px-2 py-0.5 border rounded text-xs ${
+                                    theme === 'dark'
+                                      ? 'bg-amber-900/40 text-amber-300 border-amber-800'
+                                      : 'bg-amber-500 text-white border-amber-600'
+                                  }`}>
                                     Instrumental
                                   </span>
                                 )}
                               </div>
-                              <div className="text-sm text-zinc-100 font-medium">
+                              <div className={`text-sm font-medium ${theme === 'dark' ? 'text-zinc-100' : 'text-gray-900'}`}>
                                 {repSong.isInstrumental && !repSong.songs[0] ? 'Instrumental' : 
                                  repSong.isMedley ? repSong.medleyTitle : repSong.songs[0]?.title}
                               </div>
                               {!repSong.isMedley && !repSong.isInstrumental && repSong.songs[0] && (
-                                <div className="text-xs text-zinc-400">{repSong.songs[0]?.artist}</div>
+                                <div className={`text-xs ${theme === 'dark' ? 'text-zinc-400' : 'text-gray-600'}`}>{repSong.songs[0]?.artist}</div>
                               )}
                               {repSong.customKey && (
-                                <div className="text-xs text-indigo-300 mt-1">Tom: {repSong.customKey}</div>
+                                <div className={`text-xs mt-1 ${theme === 'dark' ? 'text-indigo-300' : 'text-indigo-600'}`}>
+                                  Tom: {repSong.customKey}
+                                </div>
                               )}
                             </div>
                             <div className="flex items-center space-x-1">
@@ -1717,7 +1931,9 @@ const Admin: React.FC = () => {
                                 className={`p-1 rounded transition-colors ${
                                   index === 0 
                                     ? 'text-zinc-600 cursor-not-allowed' 
-                                    : 'text-green-400 hover:bg-green-900/20'
+                                    : theme === 'dark'
+                                      ? 'text-green-400 hover:bg-green-900/20'
+                                      : 'text-green-600 hover:bg-green-50'
                                 }`}
                                 title="Mover para cima"
                               >
@@ -1729,7 +1945,9 @@ const Admin: React.FC = () => {
                                 className={`p-1 rounded transition-colors ${
                                   index === newRepertoire.repertoireSongs.length - 1
                                     ? 'text-zinc-600 cursor-not-allowed' 
-                                    : 'text-green-400 hover:bg-green-900/20'
+                                    : theme === 'dark'
+                                      ? 'text-green-400 hover:bg-green-900/20'
+                                      : 'text-green-600 hover:bg-green-50'
                                 }`}
                                 title="Mover para baixo"
                               >
@@ -1737,14 +1955,22 @@ const Admin: React.FC = () => {
                               </button>
                               <button
                                 onClick={() => startEditRepertoireSong(index)}
-                                className="p-1 text-blue-400 hover:bg-blue-900/20 rounded transition-colors"
+                                className={`p-1 rounded transition-colors ${
+                                  theme === 'dark'
+                                    ? 'text-blue-400 hover:bg-blue-900/20'
+                                    : 'text-blue-600 hover:bg-blue-50'
+                                }`}
                                 title="Editar"
                               >
                                 <Edit className="h-4 w-4" />
                               </button>
                               <button
                                 onClick={() => removeSongFromRepertoire(repSong.id)}
-                                className="p-1 text-red-400 hover:bg-red-900/20 rounded transition-colors"
+                                className={`p-1 rounded transition-colors ${
+                                  theme === 'dark'
+                                    ? 'text-red-400 hover:bg-red-900/20'
+                                    : 'text-red-600 hover:bg-red-50'
+                                }`}
                                 title="Remover"
                               >
                                 <Trash2 className="h-4 w-4" />
@@ -1753,7 +1979,9 @@ const Admin: React.FC = () => {
                           </div>
                         ))
                       ) : (
-                        <p className="text-zinc-500 text-sm text-center py-4">Nenhuma música adicionada ainda</p>
+                        <p className={`text-sm text-center py-4 ${theme === 'dark' ? 'text-zinc-500' : 'text-gray-500'}`}>
+                          Nenhuma música adicionada ainda
+                        </p>
                       )}
                     </div>
                     <button
@@ -1782,85 +2010,119 @@ const Admin: React.FC = () => {
 
             {/* Lista de Repertórios */}
             <div>
-              <h3 className="text-base md:text-lg font-semibold text-zinc-100 mb-4">Repertórios Cadastrados</h3>
+              <h3 className={`text-base md:text-lg font-semibold mb-4 ${theme === 'dark' ? 'text-zinc-100' : 'text-gray-900'}`}>Repertórios Cadastrados</h3>
               <div className="space-y-4">
                 {repertoires.length > 0 ? (
                   repertoires.map((repertoire) => (
-                    <div key={repertoire.id} className="bg-zinc-800 border border-zinc-700 rounded-lg p-4">
+                    <div key={repertoire.id} className={`border rounded-lg p-4 ${theme === 'dark' ? 'bg-zinc-800 border-zinc-700' : 'bg-white border-gray-200'}`}>
                       {editingRepertoireId === repertoire.id ? (
                         // Modo de edição
                         <div>
                           <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 mb-4">
                             <div className="space-y-3">
                               <div>
-                                <label className="block text-sm font-medium text-zinc-300 mb-2">Nome do Repertório</label>
+                                <label className={`block text-sm font-medium mb-2 ${theme === 'dark' ? 'text-zinc-300' : 'text-gray-700'}`}>Nome do Repertório</label>
                 <input
                   type="text"
                                   placeholder="Ex: Culto de Celebração, Louvor da Manhã..."
                                   value={editRepertoire.title}
                                   onChange={(e) => setEditRepertoire({ ...editRepertoire, title: e.target.value })}
-                                  className="w-full px-3 py-2 bg-zinc-900 border border-zinc-600 text-zinc-100 placeholder-zinc-500 rounded-lg focus:ring-2 focus:ring-indigo-500"
+                                  className={`w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-indigo-500 ${
+                  theme === 'dark'
+                    ? 'bg-zinc-900 border-zinc-600 text-zinc-100 placeholder-zinc-500'
+                    : 'bg-gray-50 border-gray-300 text-gray-900 placeholder-gray-400'
+                }`}
                                 />
                               </div>
                               <div>
-                                <label className="block text-sm font-medium text-zinc-300 mb-2">Data do Culto</label>
+                                <label className={`block text-sm font-medium mb-2 ${theme === 'dark' ? 'text-zinc-300' : 'text-gray-700'}`}>Data do Culto</label>
                                 <input
                                   type="date"
                                   value={editRepertoire.weekDate}
                                   onChange={(e) => setEditRepertoire({ ...editRepertoire, weekDate: e.target.value })}
-                                  className="w-full px-3 py-2 bg-zinc-900 border border-zinc-600 text-zinc-100 placeholder-zinc-500 rounded-lg focus:ring-2 focus:ring-indigo-500"
+                                  className={`w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-indigo-500 ${
+                  theme === 'dark'
+                    ? 'bg-zinc-900 border-zinc-600 text-zinc-100 placeholder-zinc-500'
+                    : 'bg-gray-50 border-gray-300 text-gray-900 placeholder-gray-400'
+                }`}
                                 />
                               </div>
                               <div>
-                                <label className="block text-sm font-medium text-zinc-300 mb-2">Link da Playlist</label>
+                                <label className={`block text-sm font-medium mb-2 ${theme === 'dark' ? 'text-zinc-300' : 'text-gray-700'}`}>Link da Playlist</label>
                                 <input
                                   type="url"
                                   placeholder="https://youtube.com/playlist?list=..."
                                   value={editRepertoire.playlistUrl}
                                   onChange={(e) => setEditRepertoire({ ...editRepertoire, playlistUrl: e.target.value })}
-                                  className="w-full px-3 py-2 bg-zinc-900 border border-zinc-600 text-zinc-100 placeholder-zinc-500 rounded-lg focus:ring-2 focus:ring-indigo-500"
+                                  className={`w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-indigo-500 ${
+                  theme === 'dark'
+                    ? 'bg-zinc-900 border-zinc-600 text-zinc-100 placeholder-zinc-500'
+                    : 'bg-gray-50 border-gray-300 text-gray-900 placeholder-gray-400'
+                }`}
                                 />
                               </div>
                             </div>
                             <div className="space-y-3">
                               <div>
-                                <label className="block text-sm font-medium text-zinc-300 mb-2">
+                                <label className={`block text-sm font-medium mb-2 ${theme === 'dark' ? 'text-zinc-300' : 'text-gray-700'}`}>
                                   Músicas do Repertório ({editRepertoire.repertoireSongs.length})
                                 </label>
-                                <div className="space-y-2 max-h-60 overflow-y-auto pr-2 bg-zinc-900 border border-zinc-600 rounded-lg p-3">
+                                <div className={`space-y-2 max-h-60 overflow-y-auto pr-2 border rounded-lg p-3 ${
+                                  theme === 'dark' ? 'bg-zinc-900 border-zinc-600' : 'bg-gray-50 border-gray-300'
+                                }`}>
                                   {editRepertoire.repertoireSongs.length > 0 ? (
                                     editRepertoire.repertoireSongs.map((repSong, index) => (
-                                      <div key={repSong.id} className="flex items-start justify-between bg-zinc-800 p-3 rounded-lg">
+                                      <div key={repSong.id} className={`flex items-start justify-between p-3 rounded-lg ${
+                                        theme === 'dark' ? 'bg-zinc-800' : 'bg-white border border-gray-200'
+                                      }`}>
                                         <div className="flex-1">
                                           <div className="flex items-center space-x-2 mb-1">
-                                            <span className="px-2 py-0.5 bg-indigo-900/40 text-indigo-300 border border-indigo-800 rounded text-xs font-semibold">
+                                            <span className={`px-2 py-0.5 border rounded text-xs font-semibold ${
+                                              theme === 'dark'
+                                                ? 'bg-indigo-900/40 text-indigo-300 border-indigo-800'
+                                                : 'bg-indigo-500 text-white border-indigo-600'
+                                            }`}>
                                               #{index + 1}
                                             </span>
                                             {repSong.moment && (
-                                              <span className="px-2 py-0.5 bg-green-900/40 text-green-300 border border-green-800 rounded text-xs">
+                                              <span className={`px-2 py-0.5 border rounded text-xs ${
+                                                theme === 'dark'
+                                                  ? 'bg-green-900/40 text-green-300 border-green-800'
+                                                  : 'bg-green-500 text-white border-green-600'
+                                              }`}>
                                                 {repSong.moment}
                                               </span>
                                             )}
                                             {repSong.isMedley && (
-                                              <span className="px-2 py-0.5 bg-purple-900/40 text-purple-300 border border-purple-800 rounded text-xs">
+                                              <span className={`px-2 py-0.5 border rounded text-xs ${
+                                                theme === 'dark'
+                                                  ? 'bg-purple-900/40 text-purple-300 border-purple-800'
+                                                  : 'bg-purple-500 text-white border-purple-600'
+                                              }`}>
                                                 Medley
                                               </span>
                                             )}
                                             {repSong.isInstrumental && (
-                                              <span className="px-2 py-0.5 bg-amber-900/40 text-amber-300 border border-amber-800 rounded text-xs">
+                                              <span className={`px-2 py-0.5 border rounded text-xs ${
+                                                theme === 'dark'
+                                                  ? 'bg-amber-900/40 text-amber-300 border-amber-800'
+                                                  : 'bg-amber-500 text-white border-amber-600'
+                                              }`}>
                                                 Instrumental
                                               </span>
                                             )}
                                           </div>
-                                          <div className="text-sm text-zinc-100 font-medium">
+                                          <div className={`text-sm font-medium ${theme === 'dark' ? 'text-zinc-100' : 'text-gray-900'}`}>
                                             {repSong.isInstrumental && !repSong.songs[0] ? 'Instrumental' :
                                              repSong.isMedley ? repSong.medleyTitle : repSong.songs[0]?.title}
                                           </div>
                                           {!repSong.isMedley && !repSong.isInstrumental && repSong.songs[0] && (
-                                            <div className="text-xs text-zinc-400">{repSong.songs[0]?.artist}</div>
+                                            <div className={`text-xs ${theme === 'dark' ? 'text-zinc-400' : 'text-gray-600'}`}>{repSong.songs[0]?.artist}</div>
                                           )}
                                           {repSong.customKey && (
-                                            <div className="text-xs text-indigo-300 mt-1">Tom: {repSong.customKey}</div>
+                                            <div className={`text-xs mt-1 ${theme === 'dark' ? 'text-indigo-300' : 'text-indigo-600'}`}>
+                                              Tom: {repSong.customKey}
+                                            </div>
                                           )}
                                         </div>
                                         <div className="flex items-center space-x-1">
@@ -1870,7 +2132,9 @@ const Admin: React.FC = () => {
                                             className={`p-1 rounded transition-colors ${
                                               index === 0 
                                                 ? 'text-zinc-600 cursor-not-allowed' 
-                                                : 'text-green-400 hover:bg-green-900/20'
+                                                : theme === 'dark'
+                                      ? 'text-green-400 hover:bg-green-900/20'
+                                      : 'text-green-600 hover:bg-green-50'
                                             }`}
                                             title="Mover para cima"
                                           >
@@ -1882,7 +2146,9 @@ const Admin: React.FC = () => {
                                             className={`p-1 rounded transition-colors ${
                                               index === editRepertoire.repertoireSongs.length - 1
                                                 ? 'text-zinc-600 cursor-not-allowed' 
-                                                : 'text-green-400 hover:bg-green-900/20'
+                                                : theme === 'dark'
+                                      ? 'text-green-400 hover:bg-green-900/20'
+                                      : 'text-green-600 hover:bg-green-50'
                                             }`}
                                             title="Mover para baixo"
                                           >
@@ -1890,14 +2156,22 @@ const Admin: React.FC = () => {
                                           </button>
                                           <button
                                             onClick={() => startEditRepertoireSongInEdit(index)}
-                                            className="p-1 text-blue-400 hover:bg-blue-900/20 rounded transition-colors"
+                                            className={`p-1 rounded transition-colors ${
+                                  theme === 'dark'
+                                    ? 'text-blue-400 hover:bg-blue-900/20'
+                                    : 'text-blue-600 hover:bg-blue-50'
+                                }`}
                                             title="Editar"
                                           >
                                             <Edit className="h-4 w-4" />
                                           </button>
                                           <button
                                             onClick={() => removeSongFromEditRepertoire(repSong.id)}
-                                            className="p-1 text-red-400 hover:bg-red-900/20 rounded transition-colors"
+                                            className={`p-1 rounded transition-colors ${
+                                  theme === 'dark'
+                                    ? 'text-red-400 hover:bg-red-900/20'
+                                    : 'text-red-600 hover:bg-red-50'
+                                }`}
                                             title="Remover"
                                           >
                                             <Trash2 className="h-4 w-4" />
@@ -1906,7 +2180,9 @@ const Admin: React.FC = () => {
                                       </div>
                                     ))
                                   ) : (
-                                    <p className="text-zinc-500 text-sm text-center py-4">Nenhuma música adicionada ainda</p>
+                                    <p className={`text-sm text-center py-4 ${theme === 'dark' ? 'text-zinc-500' : 'text-gray-500'}`}>
+                                      Nenhuma música adicionada ainda
+                                    </p>
                                   )}
                                 </div>
                                 <button
@@ -1925,7 +2201,11 @@ const Admin: React.FC = () => {
                               <Save className="h-4 w-4 mr-2" />
                               Salvar
                             </button>
-                            <button onClick={cancelEditRepertoire} className="px-4 py-2 bg-zinc-700 text-zinc-300 rounded-lg hover:bg-zinc-600 transition-colors">
+                            <button onClick={cancelEditRepertoire} className={`px-4 py-2 rounded-lg transition-colors ${
+                              theme === 'dark'
+                                ? 'bg-zinc-700 text-zinc-300 hover:bg-zinc-600'
+                                : 'bg-gray-200 text-gray-900 hover:bg-gray-300'
+                            }`}>
                               Cancelar
                             </button>
                           </div>
@@ -1935,10 +2215,10 @@ const Admin: React.FC = () => {
                         <div>
                           <div className="flex items-center justify-between mb-3">
                             <div>
-                              <h3 className="text-xl font-bold text-zinc-100 mb-2">
+                              <h3 className={`text-xl font-bold mb-2 ${theme === 'dark' ? 'text-zinc-100' : 'text-gray-900'}`}>
                                 {repertoire.title}
                               </h3>
-                              <p className="text-sm text-zinc-400">
+                              <p className={`text-sm ${theme === 'dark' ? 'text-zinc-400' : 'text-gray-600'}`}>
                                 📅 {(() => {
                                   const date = new Date(repertoire.weekDate + 'T12:00:00');
                                   return date.toLocaleDateString('pt-BR', { 
@@ -1955,7 +2235,11 @@ const Admin: React.FC = () => {
                                   href={repertoire.playlistUrl} 
                                   target="_blank" 
                                   rel="noopener noreferrer"
-                                  className="text-sm text-indigo-400 hover:text-indigo-300 flex items-center mt-1"
+                                  className={`text-sm flex items-center mt-1 transition-colors ${
+                                    theme === 'dark'
+                                      ? 'text-indigo-400 hover:text-indigo-300'
+                                      : 'text-indigo-600 hover:text-indigo-700'
+                                  }`}
                                 >
                                   🎵 Ver Playlist no YouTube
                                 </a>
@@ -1964,37 +2248,63 @@ const Admin: React.FC = () => {
                             <div className="flex items-center space-x-2">
                               <button
                                 onClick={() => startEditRepertoire(repertoire)}
-                                className="p-2 text-blue-400 hover:bg-blue-900/20 rounded-lg transition-colors"
+                                className={`p-2 rounded-lg transition-colors ${
+                                theme === 'dark'
+                                  ? 'text-blue-400 hover:bg-blue-900/20'
+                                  : 'text-blue-600 hover:bg-blue-50'
+                              }`}
                               >
                                 <Edit className="h-4 w-4" />
                               </button>
                               <button
                                 onClick={() => handleDeleteRepertoire(repertoire.id)}
-                                className="p-2 text-red-400 hover:bg-red-900/20 rounded-lg transition-colors"
+                                className={`p-2 rounded-lg transition-colors ${
+                                theme === 'dark'
+                                  ? 'text-red-400 hover:bg-red-900/20'
+                                  : 'text-red-600 hover:bg-red-50'
+                              }`}
                               >
                                 <Trash2 className="h-4 w-4" />
                               </button>
                             </div>
                           </div>
                           <div className="mb-3">
-                            <h4 className="text-sm font-medium text-zinc-400 mb-2">Músicas ({repertoire.songs.length})</h4>
+                            <h4 className={`text-sm font-medium mb-2 ${theme === 'dark' ? 'text-zinc-400' : 'text-gray-600'}`}>
+                              Músicas ({repertoire.songs.length})
+                            </h4>
                             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-2">
                               {repertoire.songs.map((repSong, index) => (
-                                <div key={repSong.id} className="bg-zinc-700 rounded px-3 py-2 text-sm text-zinc-300">
+                                <div key={repSong.id} className={`rounded px-3 py-2 text-sm ${
+                                  theme === 'dark' ? 'bg-zinc-700 text-zinc-300' : 'bg-gray-100 text-gray-700'
+                                }`}>
                                   <div className="flex items-center flex-wrap gap-1 mb-1">
-                                    <span className="font-semibold text-indigo-400">{index + 1}.</span>
+                                    <span className={`font-semibold ${theme === 'dark' ? 'text-indigo-400' : 'text-indigo-600'}`}>
+                                      {index + 1}.
+                                    </span>
                                     {repSong.moment && (
-                                      <span className="px-1.5 py-0.5 bg-green-900/40 text-green-300 border border-green-800 rounded text-xs">
+                                      <span className={`px-1.5 py-0.5 border rounded text-xs ${
+                                        theme === 'dark'
+                                          ? 'bg-green-900/40 text-green-300 border-green-800'
+                                          : 'bg-green-500 text-white border-green-600'
+                                      }`}>
                                         {repSong.moment}
                                       </span>
                                     )}
                                     {repSong.isMedley && (
-                                      <span className="px-1.5 py-0.5 bg-purple-900/40 text-purple-300 border border-purple-800 rounded text-xs">
+                                      <span className={`px-1.5 py-0.5 border rounded text-xs ${
+                                        theme === 'dark'
+                                          ? 'bg-purple-900/40 text-purple-300 border-purple-800'
+                                          : 'bg-purple-500 text-white border-purple-600'
+                                      }`}>
                                         Medley
                                       </span>
                                     )}
                                     {repSong.isInstrumental && (
-                                      <span className="px-1.5 py-0.5 bg-amber-900/40 text-amber-300 border border-amber-800 rounded text-xs">
+                                      <span className={`px-1.5 py-0.5 border rounded text-xs ${
+                                        theme === 'dark'
+                                          ? 'bg-amber-900/40 text-amber-300 border-amber-800'
+                                          : 'bg-amber-500 text-white border-amber-600'
+                                      }`}>
                                         Instrumental
                                       </span>
                                     )}
@@ -2018,8 +2328,8 @@ const Admin: React.FC = () => {
                     </div>
                   ))
                 ) : (
-                  <div className="text-center py-12 text-zinc-400">
-                    <Music className="h-16 w-16 mx-auto mb-4 text-zinc-600" />
+                  <div className={`text-center py-12 ${theme === 'dark' ? 'text-zinc-400' : 'text-gray-600'}`}>
+                    <Music className={`h-16 w-16 mx-auto mb-4 ${theme === 'dark' ? 'text-zinc-600' : 'text-gray-400'}`} />
                     <p>Nenhum repertório cadastrado ainda.</p>
                   </div>
                 )}
@@ -2031,17 +2341,25 @@ const Admin: React.FC = () => {
         {/* Modal para Adicionar Música ao Repertório */}
         {showAddSongModal && (
           <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-2 md:p-4">
-            <div className="bg-zinc-800 rounded-lg p-4 md:p-6 max-w-2xl w-full max-h-[90vh] overflow-y-auto border border-zinc-700">
-              <h3 className="text-lg md:text-xl font-semibold text-zinc-100 mb-4">Adicionar Música / Medley</h3>
+            <div className={`rounded-lg p-4 md:p-6 max-w-2xl w-full max-h-[90vh] overflow-y-auto border ${
+              theme === 'dark' ? 'bg-zinc-800 border-zinc-700' : 'bg-white border-gray-200'
+            }`}>
+              <h3 className={`text-lg md:text-xl font-semibold mb-4 ${theme === 'dark' ? 'text-zinc-100' : 'text-gray-900'}`}>
+                Adicionar Música / Medley
+              </h3>
               
               <div className="space-y-4 mb-6">
                 <div>
-                  <label className="block text-sm font-medium text-zinc-300 mb-2">
+                  <label className={`block text-sm font-medium mb-2 ${theme === 'dark' ? 'text-zinc-300' : 'text-gray-700'}`}>
                     Selecione a(s) música(s) ({currentSongForm.selectedSongs.length} selecionada{currentSongForm.selectedSongs.length !== 1 ? 's' : ''})
                   </label>
-                  <div className="max-h-60 overflow-y-auto bg-zinc-900 border border-zinc-600 rounded-lg p-3 space-y-2">
+                  <div className={`max-h-60 overflow-y-auto border rounded-lg p-3 space-y-2 ${
+                    theme === 'dark' ? 'bg-zinc-900 border-zinc-600' : 'bg-gray-50 border-gray-300'
+                  }`}>
                     {songs.map((song) => (
-                      <label key={song.id} className="flex items-center cursor-pointer hover:bg-zinc-800 p-2 rounded">
+                      <label key={song.id} className={`flex items-center cursor-pointer p-2 rounded ${
+                        theme === 'dark' ? 'hover:bg-zinc-800' : 'hover:bg-gray-100'
+                      }`}>
                         <input 
                           type="checkbox" 
                           checked={currentSongForm.selectedSongs.includes(song.id)}
@@ -2049,15 +2367,23 @@ const Admin: React.FC = () => {
                           className="mr-3" 
                         />
                         <div className="flex-1">
-                          <div className="text-zinc-100 text-sm font-medium">{song.title}</div>
-                          <div className="text-zinc-400 text-xs">{song.artist}</div>
+                          <div className={`text-sm font-medium ${theme === 'dark' ? 'text-zinc-100' : 'text-gray-900'}`}>
+                            {song.title}
+                          </div>
+                          <div className={`text-xs ${theme === 'dark' ? 'text-zinc-400' : 'text-gray-600'}`}>
+                            {song.artist}
+                          </div>
                         </div>
                       </label>
                     ))}
                   </div>
                   {currentSongForm.selectedSongs.length > 1 && (
-                    <div className="mt-2 p-3 bg-purple-900/20 border border-purple-800 rounded-lg">
-                      <div className="flex items-center text-purple-300 text-sm">
+                    <div className={`mt-2 p-3 border rounded-lg ${
+                      theme === 'dark'
+                        ? 'bg-purple-900/20 border-purple-800'
+                        : 'bg-purple-100 border-purple-300'
+                    }`}>
+                      <div className={`flex items-center text-sm ${theme === 'dark' ? 'text-purple-300' : 'text-purple-700'}`}>
                         <Music className="h-4 w-4 mr-2" />
                         <span>Medley: {songs.filter(s => currentSongForm.selectedSongs.includes(s.id)).map(s => s.title).join(' + ')}</span>
                       </div>
@@ -2067,7 +2393,7 @@ const Admin: React.FC = () => {
 
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                   <div>
-                    <label className="block text-sm font-medium text-zinc-300 mb-2">
+                    <label className={`block text-sm font-medium mb-2 ${theme === 'dark' ? 'text-zinc-300' : 'text-gray-700'}`}>
                       Tom a ser cantado (opcional)
                     </label>
                 <input
@@ -2075,18 +2401,26 @@ const Admin: React.FC = () => {
                       placeholder="Ex: C, D, Em, F#, etc."
                       value={currentSongForm.customKey}
                       onChange={(e) => setCurrentSongForm({ ...currentSongForm, customKey: e.target.value })}
-                      className="w-full px-3 py-2 bg-zinc-900 border border-zinc-600 text-zinc-100 placeholder-zinc-500 rounded-lg focus:ring-2 focus:ring-indigo-500"
+                      className={`w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-indigo-500 ${
+                  theme === 'dark'
+                    ? 'bg-zinc-900 border-zinc-600 text-zinc-100 placeholder-zinc-500'
+                    : 'bg-gray-50 border-gray-300 text-gray-900 placeholder-gray-400'
+                }`}
                 />
               </div>
                   
                   <div>
-                    <label className="block text-sm font-medium text-zinc-300 mb-2">
+                    <label className={`block text-sm font-medium mb-2 ${theme === 'dark' ? 'text-zinc-300' : 'text-gray-700'}`}>
                       Momento do culto (opcional)
                     </label>
                     <select
                       value={currentSongForm.moment}
                       onChange={(e) => setCurrentSongForm({ ...currentSongForm, moment: e.target.value })}
-                      className="w-full px-3 py-2 bg-zinc-900 border border-zinc-600 text-zinc-100 rounded-lg focus:ring-2 focus:ring-indigo-500"
+                      className={`w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-indigo-500 ${
+                        theme === 'dark'
+                          ? 'bg-zinc-900 border-zinc-600 text-zinc-100'
+                          : 'bg-gray-50 border-gray-300 text-gray-900'
+                      }`}
                     >
                       <option value="">Selecione...</option>
                       <option value="Ofertório">Ofertório</option>
@@ -2106,11 +2440,11 @@ const Admin: React.FC = () => {
                       onChange={(e) => setCurrentSongForm({ ...currentSongForm, isInstrumental: e.target.checked })}
                       className="w-4 h-4"
                     />
-                    <span className="text-sm text-zinc-300">
+                    <span className={`text-sm ${theme === 'dark' ? 'text-zinc-300' : 'text-gray-700'}`}>
                       Apenas instrumental (sem música específica do acervo)
                     </span>
                   </label>
-                  <p className="text-xs text-zinc-500 mt-1 ml-6">
+                  <p className={`text-xs mt-1 ml-6 ${theme === 'dark' ? 'text-zinc-500' : 'text-gray-500'}`}>
                     Marque esta opção para momentos instrumentais como ofertório
                   </p>
                 </div>
@@ -2129,7 +2463,11 @@ const Admin: React.FC = () => {
                     setShowAddSongModal(false);
                     setCurrentSongForm({ selectedSongs: [], customKey: '', isMedley: false, moment: '', isInstrumental: false });
                   }}
-                  className="flex-1 px-4 py-2 bg-zinc-700 text-zinc-300 rounded-lg hover:bg-zinc-600 transition-colors"
+                  className={`flex-1 px-4 py-2 rounded-lg transition-colors ${
+                    theme === 'dark'
+                      ? 'bg-zinc-700 text-zinc-300 hover:bg-zinc-600'
+                      : 'bg-gray-200 text-gray-900 hover:bg-gray-300'
+                  }`}
                 >
                   Cancelar
                 </button>
@@ -2141,17 +2479,25 @@ const Admin: React.FC = () => {
         {/* Modal para Adicionar Música ao Repertório (Edição) */}
         {showEditSongModal && (
           <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-2 md:p-4">
-            <div className="bg-zinc-800 rounded-lg p-4 md:p-6 max-w-2xl w-full max-h-[90vh] overflow-y-auto border border-zinc-700">
-              <h3 className="text-lg md:text-xl font-semibold text-zinc-100 mb-4">Adicionar Música / Medley</h3>
+            <div className={`rounded-lg p-4 md:p-6 max-w-2xl w-full max-h-[90vh] overflow-y-auto border ${
+              theme === 'dark' ? 'bg-zinc-800 border-zinc-700' : 'bg-white border-gray-200'
+            }`}>
+              <h3 className={`text-lg md:text-xl font-semibold mb-4 ${theme === 'dark' ? 'text-zinc-100' : 'text-gray-900'}`}>
+                Adicionar Música / Medley
+              </h3>
               
               <div className="space-y-4 mb-6">
                 <div>
-                  <label className="block text-sm font-medium text-zinc-300 mb-2">
+                  <label className={`block text-sm font-medium mb-2 ${theme === 'dark' ? 'text-zinc-300' : 'text-gray-700'}`}>
                     Selecione a(s) música(s) ({currentSongForm.selectedSongs.length} selecionada{currentSongForm.selectedSongs.length !== 1 ? 's' : ''})
                   </label>
-                  <div className="max-h-60 overflow-y-auto bg-zinc-900 border border-zinc-600 rounded-lg p-3 space-y-2">
+                  <div className={`max-h-60 overflow-y-auto border rounded-lg p-3 space-y-2 ${
+                    theme === 'dark' ? 'bg-zinc-900 border-zinc-600' : 'bg-gray-50 border-gray-300'
+                  }`}>
                     {songs.map((song) => (
-                      <label key={song.id} className="flex items-center cursor-pointer hover:bg-zinc-800 p-2 rounded">
+                      <label key={song.id} className={`flex items-center cursor-pointer p-2 rounded ${
+                        theme === 'dark' ? 'hover:bg-zinc-800' : 'hover:bg-gray-100'
+                      }`}>
                 <input
                           type="checkbox" 
                           checked={currentSongForm.selectedSongs.includes(song.id)}
@@ -2159,15 +2505,23 @@ const Admin: React.FC = () => {
                           className="mr-3" 
                         />
                         <div className="flex-1">
-                          <div className="text-zinc-100 text-sm font-medium">{song.title}</div>
-                          <div className="text-zinc-400 text-xs">{song.artist}</div>
+                          <div className={`text-sm font-medium ${theme === 'dark' ? 'text-zinc-100' : 'text-gray-900'}`}>
+                            {song.title}
+                          </div>
+                          <div className={`text-xs ${theme === 'dark' ? 'text-zinc-400' : 'text-gray-600'}`}>
+                            {song.artist}
+                          </div>
                         </div>
                       </label>
                     ))}
                   </div>
                   {currentSongForm.selectedSongs.length > 1 && (
-                    <div className="mt-2 p-3 bg-purple-900/20 border border-purple-800 rounded-lg">
-                      <div className="flex items-center text-purple-300 text-sm">
+                    <div className={`mt-2 p-3 border rounded-lg ${
+                      theme === 'dark'
+                        ? 'bg-purple-900/20 border-purple-800'
+                        : 'bg-purple-100 border-purple-300'
+                    }`}>
+                      <div className={`flex items-center text-sm ${theme === 'dark' ? 'text-purple-300' : 'text-purple-700'}`}>
                         <Music className="h-4 w-4 mr-2" />
                         <span>Medley: {songs.filter(s => currentSongForm.selectedSongs.includes(s.id)).map(s => s.title).join(' + ')}</span>
                       </div>
@@ -2177,7 +2531,7 @@ const Admin: React.FC = () => {
 
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                   <div>
-                    <label className="block text-sm font-medium text-zinc-300 mb-2">
+                    <label className={`block text-sm font-medium mb-2 ${theme === 'dark' ? 'text-zinc-300' : 'text-gray-700'}`}>
                       Tom a ser cantado (opcional)
                     </label>
                     <input
@@ -2185,12 +2539,16 @@ const Admin: React.FC = () => {
                       placeholder="Ex: C, D, Em, F#, etc."
                       value={currentSongForm.customKey}
                       onChange={(e) => setCurrentSongForm({ ...currentSongForm, customKey: e.target.value })}
-                      className="w-full px-3 py-2 bg-zinc-900 border border-zinc-600 text-zinc-100 placeholder-zinc-500 rounded-lg focus:ring-2 focus:ring-indigo-500"
+                      className={`w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-indigo-500 ${
+                  theme === 'dark'
+                    ? 'bg-zinc-900 border-zinc-600 text-zinc-100 placeholder-zinc-500'
+                    : 'bg-gray-50 border-gray-300 text-gray-900 placeholder-gray-400'
+                }`}
                     />
                   </div>
                   
                   <div>
-                    <label className="block text-sm font-medium text-zinc-300 mb-2">
+                    <label className={`block text-sm font-medium mb-2 ${theme === 'dark' ? 'text-zinc-300' : 'text-gray-700'}`}>
                       Momento do culto (opcional)
                     </label>
                 <select
@@ -2216,11 +2574,11 @@ const Admin: React.FC = () => {
                       onChange={(e) => setCurrentSongForm({ ...currentSongForm, isInstrumental: e.target.checked })}
                       className="w-4 h-4"
                     />
-                    <span className="text-sm text-zinc-300">
+                    <span className={`text-sm ${theme === 'dark' ? 'text-zinc-300' : 'text-gray-700'}`}>
                       Apenas instrumental (sem música específica do acervo)
                     </span>
                   </label>
-                  <p className="text-xs text-zinc-500 mt-1 ml-6">
+                  <p className={`text-xs mt-1 ml-6 ${theme === 'dark' ? 'text-zinc-500' : 'text-gray-500'}`}>
                     Marque esta opção para momentos instrumentais como ofertório
                   </p>
                 </div>
@@ -2239,7 +2597,11 @@ const Admin: React.FC = () => {
                     setShowEditSongModal(false);
                     setCurrentSongForm({ selectedSongs: [], customKey: '', isMedley: false, moment: '', isInstrumental: false });
                   }}
-                  className="flex-1 px-4 py-2 bg-zinc-700 text-zinc-300 rounded-lg hover:bg-zinc-600 transition-colors"
+                  className={`flex-1 px-4 py-2 rounded-lg transition-colors ${
+                    theme === 'dark'
+                      ? 'bg-zinc-700 text-zinc-300 hover:bg-zinc-600'
+                      : 'bg-gray-200 text-gray-900 hover:bg-gray-300'
+                  }`}
                 >
                   Cancelar
                 </button>
@@ -2251,12 +2613,16 @@ const Admin: React.FC = () => {
         {/* Modal para Editar Música do Repertório (Novo Repertório) */}
         {editingRepertoireSongIndex !== null && (
           <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-2 md:p-4">
-            <div className="bg-zinc-800 rounded-lg p-4 md:p-6 max-w-2xl w-full max-h-[90vh] overflow-y-auto border border-zinc-700">
-              <h3 className="text-lg md:text-xl font-semibold text-zinc-100 mb-4">Editar Música / Medley</h3>
+            <div className={`rounded-lg p-4 md:p-6 max-w-2xl w-full max-h-[90vh] overflow-y-auto border ${
+              theme === 'dark' ? 'bg-zinc-800 border-zinc-700' : 'bg-white border-gray-200'
+            }`}>
+              <h3 className={`text-lg md:text-xl font-semibold mb-4 ${theme === 'dark' ? 'text-zinc-100' : 'text-gray-900'}`}>
+                Editar Música / Medley
+              </h3>
               
               <div className="space-y-4 mb-6">
                 <div>
-                  <label className="block text-sm font-medium text-zinc-300 mb-2">
+                  <label className={`block text-sm font-medium mb-2 ${theme === 'dark' ? 'text-zinc-300' : 'text-gray-700'}`}>
                     Selecione a(s) música(s) ({currentSongForm.selectedSongs.length} selecionada{currentSongForm.selectedSongs.length !== 1 ? 's' : ''})
                   </label>
                   <div className="max-h-60 overflow-y-auto bg-zinc-900 border border-zinc-600 rounded-lg p-3 space-y-2">
@@ -2276,8 +2642,12 @@ const Admin: React.FC = () => {
                     ))}
                   </div>
                   {currentSongForm.selectedSongs.length > 1 && (
-                    <div className="mt-2 p-3 bg-purple-900/20 border border-purple-800 rounded-lg">
-                      <div className="flex items-center text-purple-300 text-sm">
+                    <div className={`mt-2 p-3 border rounded-lg ${
+                      theme === 'dark'
+                        ? 'bg-purple-900/20 border-purple-800'
+                        : 'bg-purple-100 border-purple-300'
+                    }`}>
+                      <div className={`flex items-center text-sm ${theme === 'dark' ? 'text-purple-300' : 'text-purple-700'}`}>
                         <Music className="h-4 w-4 mr-2" />
                         <span>Medley: {songs.filter(s => currentSongForm.selectedSongs.includes(s.id)).map(s => s.title).join(' + ')}</span>
                       </div>
@@ -2287,7 +2657,7 @@ const Admin: React.FC = () => {
 
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                   <div>
-                    <label className="block text-sm font-medium text-zinc-300 mb-2">
+                    <label className={`block text-sm font-medium mb-2 ${theme === 'dark' ? 'text-zinc-300' : 'text-gray-700'}`}>
                       Tom a ser cantado (opcional)
                     </label>
                     <input
@@ -2295,18 +2665,26 @@ const Admin: React.FC = () => {
                       placeholder="Ex: C, D, Em, F#, etc."
                       value={currentSongForm.customKey}
                       onChange={(e) => setCurrentSongForm({ ...currentSongForm, customKey: e.target.value })}
-                      className="w-full px-3 py-2 bg-zinc-900 border border-zinc-600 text-zinc-100 placeholder-zinc-500 rounded-lg focus:ring-2 focus:ring-indigo-500"
+                      className={`w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-indigo-500 ${
+                  theme === 'dark'
+                    ? 'bg-zinc-900 border-zinc-600 text-zinc-100 placeholder-zinc-500'
+                    : 'bg-gray-50 border-gray-300 text-gray-900 placeholder-gray-400'
+                }`}
                     />
                   </div>
                   
                   <div>
-                    <label className="block text-sm font-medium text-zinc-300 mb-2">
+                    <label className={`block text-sm font-medium mb-2 ${theme === 'dark' ? 'text-zinc-300' : 'text-gray-700'}`}>
                       Momento do culto (opcional)
                     </label>
                     <select
                       value={currentSongForm.moment}
                       onChange={(e) => setCurrentSongForm({ ...currentSongForm, moment: e.target.value })}
-                      className="w-full px-3 py-2 bg-zinc-900 border border-zinc-600 text-zinc-100 rounded-lg focus:ring-2 focus:ring-indigo-500"
+                      className={`w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-indigo-500 ${
+                        theme === 'dark'
+                          ? 'bg-zinc-900 border-zinc-600 text-zinc-100'
+                          : 'bg-gray-50 border-gray-300 text-gray-900'
+                      }`}
                     >
                       <option value="">Selecione...</option>
                       <option value="Ofertório">Ofertório</option>
@@ -2326,7 +2704,7 @@ const Admin: React.FC = () => {
                       onChange={(e) => setCurrentSongForm({ ...currentSongForm, isInstrumental: e.target.checked })}
                       className="w-4 h-4"
                     />
-                    <span className="text-sm text-zinc-300">
+                    <span className={`text-sm ${theme === 'dark' ? 'text-zinc-300' : 'text-gray-700'}`}>
                       Apenas instrumental (sem música específica do acervo)
                         </span>
                   </label>
@@ -2343,7 +2721,11 @@ const Admin: React.FC = () => {
                 </button>
                 <button
                   onClick={cancelEditRepertoireSong}
-                  className="flex-1 px-4 py-2 bg-zinc-700 text-zinc-300 rounded-lg hover:bg-zinc-600 transition-colors"
+                  className={`flex-1 px-4 py-2 rounded-lg transition-colors ${
+                    theme === 'dark'
+                      ? 'bg-zinc-700 text-zinc-300 hover:bg-zinc-600'
+                      : 'bg-gray-200 text-gray-900 hover:bg-gray-300'
+                  }`}
                 >
                   Cancelar
                     </button>
@@ -2355,17 +2737,25 @@ const Admin: React.FC = () => {
         {/* Modal para Editar Música do Repertório (Editando Repertório) */}
         {editingRepertoireSongIndexInEdit !== null && (
           <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-2 md:p-4">
-            <div className="bg-zinc-800 rounded-lg p-4 md:p-6 max-w-2xl w-full max-h-[90vh] overflow-y-auto border border-zinc-700">
-              <h3 className="text-lg md:text-xl font-semibold text-zinc-100 mb-4">Editar Música / Medley</h3>
+            <div className={`rounded-lg p-4 md:p-6 max-w-2xl w-full max-h-[90vh] overflow-y-auto border ${
+              theme === 'dark' ? 'bg-zinc-800 border-zinc-700' : 'bg-white border-gray-200'
+            }`}>
+              <h3 className={`text-lg md:text-xl font-semibold mb-4 ${theme === 'dark' ? 'text-zinc-100' : 'text-gray-900'}`}>
+                Editar Música / Medley
+              </h3>
               
               <div className="space-y-4 mb-6">
                 <div>
-                  <label className="block text-sm font-medium text-zinc-300 mb-2">
+                  <label className={`block text-sm font-medium mb-2 ${theme === 'dark' ? 'text-zinc-300' : 'text-gray-700'}`}>
                     Selecione a(s) música(s) ({currentSongForm.selectedSongs.length} selecionada{currentSongForm.selectedSongs.length !== 1 ? 's' : ''})
                   </label>
-                  <div className="max-h-60 overflow-y-auto bg-zinc-900 border border-zinc-600 rounded-lg p-3 space-y-2">
+                  <div className={`max-h-60 overflow-y-auto border rounded-lg p-3 space-y-2 ${
+                    theme === 'dark' ? 'bg-zinc-900 border-zinc-600' : 'bg-gray-50 border-gray-300'
+                  }`}>
                     {songs.map((song) => (
-                      <label key={song.id} className="flex items-center cursor-pointer hover:bg-zinc-800 p-2 rounded">
+                      <label key={song.id} className={`flex items-center cursor-pointer p-2 rounded ${
+                        theme === 'dark' ? 'hover:bg-zinc-800' : 'hover:bg-gray-100'
+                      }`}>
                         <input 
                           type="checkbox" 
                           checked={currentSongForm.selectedSongs.includes(song.id)}
@@ -2373,15 +2763,23 @@ const Admin: React.FC = () => {
                           className="mr-3" 
                         />
                         <div className="flex-1">
-                          <div className="text-zinc-100 text-sm font-medium">{song.title}</div>
-                          <div className="text-zinc-400 text-xs">{song.artist}</div>
+                          <div className={`text-sm font-medium ${theme === 'dark' ? 'text-zinc-100' : 'text-gray-900'}`}>
+                            {song.title}
+                          </div>
+                          <div className={`text-xs ${theme === 'dark' ? 'text-zinc-400' : 'text-gray-600'}`}>
+                            {song.artist}
+                          </div>
                         </div>
                       </label>
                     ))}
                   </div>
                   {currentSongForm.selectedSongs.length > 1 && (
-                    <div className="mt-2 p-3 bg-purple-900/20 border border-purple-800 rounded-lg">
-                      <div className="flex items-center text-purple-300 text-sm">
+                    <div className={`mt-2 p-3 border rounded-lg ${
+                      theme === 'dark'
+                        ? 'bg-purple-900/20 border-purple-800'
+                        : 'bg-purple-100 border-purple-300'
+                    }`}>
+                      <div className={`flex items-center text-sm ${theme === 'dark' ? 'text-purple-300' : 'text-purple-700'}`}>
                         <Music className="h-4 w-4 mr-2" />
                         <span>Medley: {songs.filter(s => currentSongForm.selectedSongs.includes(s.id)).map(s => s.title).join(' + ')}</span>
                       </div>
@@ -2391,7 +2789,7 @@ const Admin: React.FC = () => {
 
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                   <div>
-                    <label className="block text-sm font-medium text-zinc-300 mb-2">
+                    <label className={`block text-sm font-medium mb-2 ${theme === 'dark' ? 'text-zinc-300' : 'text-gray-700'}`}>
                       Tom a ser cantado (opcional)
                     </label>
                     <input
@@ -2399,18 +2797,26 @@ const Admin: React.FC = () => {
                       placeholder="Ex: C, D, Em, F#, etc."
                       value={currentSongForm.customKey}
                       onChange={(e) => setCurrentSongForm({ ...currentSongForm, customKey: e.target.value })}
-                      className="w-full px-3 py-2 bg-zinc-900 border border-zinc-600 text-zinc-100 placeholder-zinc-500 rounded-lg focus:ring-2 focus:ring-indigo-500"
+                      className={`w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-indigo-500 ${
+                  theme === 'dark'
+                    ? 'bg-zinc-900 border-zinc-600 text-zinc-100 placeholder-zinc-500'
+                    : 'bg-gray-50 border-gray-300 text-gray-900 placeholder-gray-400'
+                }`}
                     />
                   </div>
                   
                   <div>
-                    <label className="block text-sm font-medium text-zinc-300 mb-2">
+                    <label className={`block text-sm font-medium mb-2 ${theme === 'dark' ? 'text-zinc-300' : 'text-gray-700'}`}>
                       Momento do culto (opcional)
                     </label>
                     <select
                       value={currentSongForm.moment}
                       onChange={(e) => setCurrentSongForm({ ...currentSongForm, moment: e.target.value })}
-                      className="w-full px-3 py-2 bg-zinc-900 border border-zinc-600 text-zinc-100 rounded-lg focus:ring-2 focus:ring-indigo-500"
+                      className={`w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-indigo-500 ${
+                        theme === 'dark'
+                          ? 'bg-zinc-900 border-zinc-600 text-zinc-100'
+                          : 'bg-gray-50 border-gray-300 text-gray-900'
+                      }`}
                     >
                       <option value="">Selecione...</option>
                       <option value="Ofertório">Ofertório</option>
@@ -2430,7 +2836,7 @@ const Admin: React.FC = () => {
                       onChange={(e) => setCurrentSongForm({ ...currentSongForm, isInstrumental: e.target.checked })}
                       className="w-4 h-4"
                     />
-                    <span className="text-sm text-zinc-300">
+                    <span className={`text-sm ${theme === 'dark' ? 'text-zinc-300' : 'text-gray-700'}`}>
                       Apenas instrumental (sem música específica do acervo)
                     </span>
                   </label>
@@ -2447,7 +2853,11 @@ const Admin: React.FC = () => {
                 </button>
                 <button
                   onClick={cancelEditRepertoireSongInEdit}
-                  className="flex-1 px-4 py-2 bg-zinc-700 text-zinc-300 rounded-lg hover:bg-zinc-600 transition-colors"
+                  className={`flex-1 px-4 py-2 rounded-lg transition-colors ${
+                    theme === 'dark'
+                      ? 'bg-zinc-700 text-zinc-300 hover:bg-zinc-600'
+                      : 'bg-gray-200 text-gray-900 hover:bg-gray-300'
+                  }`}
                 >
                   Cancelar
                 </button>
@@ -2459,28 +2869,42 @@ const Admin: React.FC = () => {
         {/* Settings Tab */}
         {activeTab === 'settings' && (
           <div>
-            <h2 className="text-2xl font-bold text-zinc-100 mb-6">Configurações</h2>
+            <h2 className={`text-2xl font-bold mb-6 ${theme === 'dark' ? 'text-zinc-100' : 'text-gray-900'}`}>
+              Configurações
+            </h2>
 
-            <div className="bg-zinc-800 rounded-lg p-6 border border-zinc-700">
-              <h3 className="text-lg font-semibold text-zinc-100 mb-4">Informações do Ministério</h3>
+            <div className={`rounded-lg p-6 border ${
+              theme === 'dark' ? 'bg-zinc-800 border-zinc-700' : 'bg-white border-gray-200'
+            }`}>
+              <h3 className={`text-lg font-semibold mb-4 ${theme === 'dark' ? 'text-zinc-100' : 'text-gray-900'}`}>
+                Informações do Ministério
+              </h3>
               <div className="space-y-4">
                 <div>
-                  <label className="block text-sm font-medium text-zinc-300 mb-2">
+                  <label className={`block text-sm font-medium mb-2 ${theme === 'dark' ? 'text-zinc-300' : 'text-gray-700'}`}>
                     Nome do Ministério
                   </label>
                   <input
                     type="text"
                     defaultValue="QG WORSHIP"
-                    className="w-full px-3 py-2 bg-zinc-800 border border-zinc-700 text-zinc-100 placeholder-zinc-500 rounded-lg focus:ring-2 focus:ring-indigo-500"
+                    className={`w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-indigo-500 ${
+                      theme === 'dark'
+                        ? 'bg-zinc-800 border-zinc-700 text-zinc-100 placeholder-zinc-500'
+                        : 'bg-gray-50 border-gray-300 text-gray-900 placeholder-gray-400'
+                    }`}
                   />
                 </div>
                 <div>
-                  <label className="block text-sm font-medium text-zinc-300 mb-2">
+                  <label className={`block text-sm font-medium mb-2 ${theme === 'dark' ? 'text-zinc-300' : 'text-gray-700'}`}>
                     Descrição
                   </label>
                   <textarea
                     defaultValue="Ministério de Louvor da Igreja"
-                    className="w-full px-3 py-2 bg-zinc-800 border border-zinc-700 text-zinc-100 placeholder-zinc-500 rounded-lg focus:ring-2 focus:ring-indigo-500"
+                    className={`w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-indigo-500 ${
+                      theme === 'dark'
+                        ? 'bg-zinc-800 border-zinc-700 text-zinc-100 placeholder-zinc-500'
+                        : 'bg-gray-50 border-gray-300 text-gray-900 placeholder-gray-400'
+                    }`}
                     rows={3}
                   />
                 </div>

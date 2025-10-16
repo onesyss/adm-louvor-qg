@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { Music, Eye, EyeOff, Lock, Mail } from 'lucide-react';
 import { signInWithEmailAndPassword } from 'firebase/auth';
 import { auth } from '../firebase/config';
+import { useTheme } from '../context/ThemeContext';
 
 const Login: React.FC = () => {
   const [email, setEmail] = useState('');
@@ -12,6 +13,7 @@ const Login: React.FC = () => {
   const [error, setError] = useState('');
   
   const navigate = useNavigate();
+  const { theme } = useTheme();
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -40,39 +42,61 @@ const Login: React.FC = () => {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-zinc-900 via-zinc-950 to-black flex items-center justify-center p-4">
+    <div className={`min-h-screen flex items-center justify-center p-4 transition-colors duration-300 ${
+      theme === 'dark'
+        ? 'bg-gradient-to-br from-zinc-900 via-zinc-950 to-black'
+        : 'bg-gradient-to-br from-gray-50 via-white to-gray-100'
+    }`}>
       <div className="glass p-8 w-full max-w-md">
         {/* Logo */}
         <div className="text-center mb-8">
           <div className="flex items-center justify-center mb-4">
-            <Music className="h-12 w-12 text-indigo-400" />
-            <span className="ml-3 text-3xl font-bold text-zinc-100">QG WORSHIP</span>
+            <Music className="h-12 w-12 text-indigo-500" />
+            <span className={`ml-3 text-3xl font-bold ${theme === 'dark' ? 'text-zinc-100' : 'text-gray-900'}`}>
+              QG WORSHIP
+            </span>
           </div>
-          <h1 className="text-2xl font-bold text-zinc-100">Área Administrativa</h1>
-          <p className="text-zinc-400 mt-2">Faça login para acessar o painel administrativo</p>
+          <h1 className={`text-2xl font-bold ${theme === 'dark' ? 'text-zinc-100' : 'text-gray-900'}`}>
+            Área Administrativa
+          </h1>
+          <p className={`mt-2 ${theme === 'dark' ? 'text-zinc-400' : 'text-gray-600'}`}>
+            Faça login para acessar o painel administrativo
+          </p>
         </div>
 
         {/* Login Form */}
         <form onSubmit={handleSubmit} className="space-y-6">
           {error && (
-            <div className="bg-red-900/40 border border-red-800 text-red-300 px-4 py-3 rounded-lg">
+            <div className={`border px-4 py-3 rounded-lg ${
+              theme === 'dark'
+                ? 'bg-red-900/40 border-red-800 text-red-300'
+                : 'bg-red-100 border-red-300 text-red-700'
+            }`}>
               {error}
             </div>
           )}
 
           {/* Email */}
           <div>
-            <label htmlFor="email" className="block text-sm font-medium text-zinc-300 mb-2">
+            <label htmlFor="email" className={`block text-sm font-medium mb-2 ${
+              theme === 'dark' ? 'text-zinc-300' : 'text-gray-700'
+            }`}>
               Email
             </label>
             <div className="relative">
-              <Mail className="absolute left-3 top-1/2 transform -translate-y-1/2 h-5 w-5 text-zinc-400" />
+              <Mail className={`absolute left-3 top-1/2 transform -translate-y-1/2 h-5 w-5 ${
+                theme === 'dark' ? 'text-zinc-400' : 'text-gray-500'
+              }`} />
               <input
                 type="email"
                 id="email"
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
-                className="w-full pl-10 pr-4 py-3 bg-zinc-800 border border-zinc-700 text-zinc-100 placeholder-zinc-500 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent"
+                className={`w-full pl-10 pr-4 py-3 border rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent ${
+                  theme === 'dark'
+                    ? 'bg-zinc-800 border-zinc-700 text-zinc-100 placeholder-zinc-500'
+                    : 'bg-white border-gray-300 text-gray-900 placeholder-gray-400'
+                }`}
                 placeholder="seu@email.com"
                 required
               />
@@ -81,24 +105,36 @@ const Login: React.FC = () => {
 
           {/* Password */}
           <div>
-            <label htmlFor="password" className="block text-sm font-medium text-zinc-300 mb-2">
+            <label htmlFor="password" className={`block text-sm font-medium mb-2 ${
+              theme === 'dark' ? 'text-zinc-300' : 'text-gray-700'
+            }`}>
               Senha
             </label>
             <div className="relative">
-              <Lock className="absolute left-3 top-1/2 transform -translate-y-1/2 h-5 w-5 text-zinc-400" />
+              <Lock className={`absolute left-3 top-1/2 transform -translate-y-1/2 h-5 w-5 ${
+                theme === 'dark' ? 'text-zinc-400' : 'text-gray-500'
+              }`} />
               <input
                 type={showPassword ? 'text' : 'password'}
                 id="password"
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
-                className="w-full pl-10 pr-12 py-3 bg-zinc-800 border border-zinc-700 text-zinc-100 placeholder-zinc-500 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent"
+                className={`w-full pl-10 pr-12 py-3 border rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent ${
+                  theme === 'dark'
+                    ? 'bg-zinc-800 border-zinc-700 text-zinc-100 placeholder-zinc-500'
+                    : 'bg-white border-gray-300 text-gray-900 placeholder-gray-400'
+                }`}
                 placeholder="Sua senha"
                 required
               />
               <button
                 type="button"
                 onClick={() => setShowPassword(!showPassword)}
-                className="absolute right-3 top-1/2 transform -translate-y-1/2 text-zinc-400 hover:text-zinc-300"
+                className={`absolute right-3 top-1/2 transform -translate-y-1/2 ${
+                  theme === 'dark'
+                    ? 'text-zinc-400 hover:text-zinc-300'
+                    : 'text-gray-500 hover:text-gray-700'
+                }`}
               >
                 {showPassword ? <EyeOff className="h-5 w-5" /> : <Eye className="h-5 w-5" />}
               </button>
@@ -109,7 +145,13 @@ const Login: React.FC = () => {
           <button
             type="submit"
             disabled={isLoading}
-            className="w-full bg-indigo-600 hover:bg-indigo-700 disabled:bg-zinc-600 text-white font-medium py-3 px-4 rounded-lg transition-colors duration-200 flex items-center justify-center"
+            className={`w-full font-medium py-3 px-4 rounded-lg transition-colors duration-200 flex items-center justify-center ${
+              isLoading
+                ? theme === 'dark'
+                  ? 'bg-zinc-600 text-white'
+                  : 'bg-gray-300 text-gray-600'
+                : 'bg-indigo-600 hover:bg-indigo-700 text-white'
+            }`}
           >
             {isLoading ? (
               <>
@@ -130,7 +172,11 @@ const Login: React.FC = () => {
         <div className="text-center mt-6">
           <button
             onClick={() => navigate('/')}
-            className="text-indigo-400 hover:text-indigo-300 text-sm font-medium transition-colors"
+            className={`text-sm font-medium transition-colors ${
+              theme === 'dark'
+                ? 'text-indigo-400 hover:text-indigo-300'
+                : 'text-indigo-600 hover:text-indigo-700'
+            }`}
           >
             ← Voltar ao site
           </button>

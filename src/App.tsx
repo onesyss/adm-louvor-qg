@@ -1,5 +1,6 @@
 import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
 import { AppProvider } from './context/AppContext';
+import { ThemeProvider } from './context/ThemeContext';
 import { NotificationProvider } from './components/Notification';
 import Layout from './components/Layout';
 import ProtectedRoute from './components/ProtectedRoute';
@@ -15,9 +16,10 @@ import Songs from './pages/Songs';
 
 function App() {
   return (
-    <NotificationProvider>
-      <AppProvider>
-        <Router>
+    <ThemeProvider>
+      <NotificationProvider>
+        <AppProvider>
+          <Router>
           <div className="App">
             <Routes>
               <Route path="/login" element={<Login />} />
@@ -37,9 +39,10 @@ function App() {
               </Route>
             </Routes>
           </div>
-        </Router>
-      </AppProvider>
-    </NotificationProvider>
+          </Router>
+        </AppProvider>
+      </NotificationProvider>
+    </ThemeProvider>
   );
 }
 

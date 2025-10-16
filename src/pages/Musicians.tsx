@@ -2,10 +2,12 @@ import React, { useState } from 'react';
 import { Users, Guitar, Mic, Music, Volume2, Plus, Save, X, Edit, Trash2, Search } from 'lucide-react';
 import { useAppContext } from '../context/AppContext';
 import { useNotification } from '../components/Notification';
+import { useTheme } from '../context/ThemeContext';
 
 const Musicians: React.FC = () => {
   const { musicians, addMusician, updateMusician, deleteMusician } = useAppContext();
   const { addNotification, showConfirm } = useNotification();
+  const { theme } = useTheme();
   
   // Estados para o formulário de cadastro
   const [isAddingMusician, setIsAddingMusician] = useState(false);
@@ -54,15 +56,15 @@ const Musicians: React.FC = () => {
   const getInstrumentIcon = (instrument: string) => {
     switch (instrument) {
       case 'Guitarra':
-        return <Guitar className="h-5 w-5" />;
+        return <Guitar className="h-8 w-8" />;
       case 'Violão':
-        return <Guitar className="h-5 w-5" />;
+        return <Guitar className="h-8 w-8" />;
       case 'Vocal':
-        return <Mic className="h-5 w-5" />;
+        return <Mic className="h-8 w-8" />;
       case 'Técnico de Som':
-        return <Volume2 className="h-5 w-5" />;
+        return <Volume2 className="h-8 w-8" />;
       default:
-        return <Music className="h-5 w-5" />;
+        return <Music className="h-8 w-8" />;
     }
   };
 
@@ -231,20 +233,30 @@ const Musicians: React.FC = () => {
   const MusicianCard = ({ musician }: { musician: any }) => {
     if (editingMusicianId === musician.id) {
       return (
-        <div className="bg-zinc-800 rounded-lg p-4 border border-zinc-700">
+        <div className={`rounded-lg p-4 border ${
+          theme === 'dark' ? 'bg-zinc-800 border-zinc-700' : 'bg-white border-gray-200'
+        }`}>
           <div className="space-y-4">
             <input
               type="text"
               value={editMusician.name}
               onChange={(e) => setEditMusician({ ...editMusician, name: e.target.value })}
-              className="w-full px-3 py-2 bg-zinc-700 border border-zinc-600 text-zinc-100 rounded-lg focus:ring-2 focus:ring-indigo-500"
+              className={`w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-indigo-500 ${
+                theme === 'dark'
+                  ? 'bg-zinc-700 border-zinc-600 text-zinc-100'
+                  : 'bg-gray-50 border-gray-300 text-gray-900'
+              }`}
               autoFocus
               placeholder="Nome e sobrenome"
             />
             <select
               value={editMusician.instrument}
               onChange={(e) => setEditMusician({ ...editMusician, instrument: e.target.value as any })}
-              className="w-full px-3 py-2 bg-zinc-700 border border-zinc-600 text-zinc-100 rounded-lg focus:ring-2 focus:ring-indigo-500"
+              className={`w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-indigo-500 ${
+                theme === 'dark'
+                  ? 'bg-zinc-700 border-zinc-600 text-zinc-100'
+                  : 'bg-gray-50 border-gray-300 text-gray-900'
+              }`}
             >
               <option value="Guitarra">Guitarra</option>
               <option value="Violão">Violão</option>
@@ -261,15 +273,23 @@ const Musicians: React.FC = () => {
                   type="file"
                   accept="image/*"
                   onChange={handleEditFileChange}
-                  className="flex-1 px-2 py-1 bg-zinc-700 border border-zinc-600 text-zinc-100 rounded text-xs file:mr-2 file:py-1 file:px-2 file:rounded file:border-0 file:text-xs file:font-medium file:bg-indigo-600 file:text-white"
+                  className={`flex-1 px-2 py-1 border rounded text-xs file:mr-2 file:py-1 file:px-2 file:rounded file:border-0 file:text-xs file:font-medium file:bg-indigo-600 file:text-white ${
+                    theme === 'dark'
+                      ? 'bg-zinc-700 border-zinc-600 text-zinc-100'
+                      : 'bg-gray-50 border-gray-300 text-gray-900'
+                  }`}
                 />
-                <span className="text-zinc-400 text-xs">ou</span>
+                <span className={`text-xs ${theme === 'dark' ? 'text-zinc-400' : 'text-gray-600'}`}>ou</span>
                 <input
                   type="url"
                   placeholder="URL"
                   value={editMusician.photoUrl}
                   onChange={(e) => handleEditUrlChange(e.target.value)}
-                  className="flex-1 px-2 py-1 bg-zinc-700 border border-zinc-600 text-zinc-100 placeholder-zinc-500 rounded text-xs focus:ring-1 focus:ring-indigo-500"
+                  className={`flex-1 px-2 py-1 border rounded text-xs focus:ring-1 focus:ring-indigo-500 ${
+                    theme === 'dark'
+                      ? 'bg-zinc-700 border-zinc-600 text-zinc-100 placeholder-zinc-500'
+                      : 'bg-gray-50 border-gray-300 text-gray-900 placeholder-gray-400'
+                  }`}
                 />
               </div>
               
@@ -278,7 +298,9 @@ const Musicians: React.FC = () => {
                   <img
                     src={editPhotoPreview || editMusician.photoUrl}
                     alt="Preview"
-                    className="w-8 h-8 rounded-full object-cover border border-zinc-600"
+                    className={`w-8 h-8 rounded-full object-cover border ${
+                      theme === 'dark' ? 'border-zinc-600' : 'border-gray-300'
+                    }`}
                   />
                   <button
                     type="button"
@@ -286,7 +308,7 @@ const Musicians: React.FC = () => {
                       setEditPhotoPreview('');
                       setEditMusician({ ...editMusician, photoUrl: '' });
                     }}
-                    className="text-red-400 hover:text-red-300 text-xs"
+                    className="text-red-500 hover:text-red-600 text-xs font-medium"
                   >
                     Remover
                   </button>
@@ -299,7 +321,11 @@ const Musicians: React.FC = () => {
                 <Save className="h-3 w-3 mr-1 inline" />
                 Salvar
               </button>
-              <button onClick={cancelEditMusician} className="flex-1 bg-zinc-600 hover:bg-zinc-700 text-white text-sm py-1 px-2 rounded transition-colors">
+              <button onClick={cancelEditMusician} className={`flex-1 text-white text-sm py-1 px-2 rounded transition-colors ${
+                theme === 'dark'
+                  ? 'bg-zinc-600 hover:bg-zinc-700'
+                  : 'bg-gray-400 hover:bg-gray-500'
+              }`}>
                 <X className="h-3 w-3 mr-1 inline" />
                 Cancelar
               </button>
@@ -310,29 +336,43 @@ const Musicians: React.FC = () => {
     }
 
     return (
-      <div className="bg-zinc-800 rounded-lg p-4 border border-zinc-700 hover:shadow-lg transition-shadow">
+      <div className={`rounded-lg p-4 border hover:shadow-lg transition-shadow ${
+        theme === 'dark' 
+          ? 'bg-zinc-800 border-zinc-700' 
+          : 'bg-white border-gray-200'
+      }`}>
         <div className="flex items-center justify-between">
-          <div className="flex items-center space-x-3">
+          <div className="flex items-center space-x-4">
             {musician.photoUrl ? (
               <img 
                 src={musician.photoUrl} 
                 alt={musician.name}
-                className="w-12 h-12 rounded-full object-cover border-2 border-zinc-600"
+                className={`w-20 h-20 rounded-full object-cover border-2 ${
+                  theme === 'dark' ? 'border-zinc-600' : 'border-gray-300'
+                }`}
               />
             ) : (
-              <div className={`w-12 h-12 rounded-full flex items-center justify-center ${getInstrumentColor(musician.instrument)}`}>
+              <div className={`w-20 h-20 rounded-full flex items-center justify-center ${getInstrumentColor(musician.instrument)}`}>
                 {getInstrumentIcon(musician.instrument)}
               </div>
             )}
             <div>
-              <h3 className="font-semibold text-zinc-100">{musician.name}</h3>
-              <p className="text-sm text-zinc-400">{musician.instrument}</p>
+              <h3 className={`font-semibold ${theme === 'dark' ? 'text-zinc-100' : 'text-gray-900'}`}>
+                {musician.name}
+              </h3>
+              <p className={`text-sm ${theme === 'dark' ? 'text-zinc-400' : 'text-gray-600'}`}>
+                {musician.instrument}
+              </p>
             </div>
           </div>
           <div className="flex items-center space-x-2">
             <button
               onClick={() => startEditMusician(musician)}
-              className="p-2 text-zinc-400 hover:text-indigo-400 hover:bg-indigo-900/20 rounded-lg transition-colors"
+              className={`p-2 rounded-lg transition-colors ${
+                theme === 'dark'
+                  ? 'text-zinc-400 hover:text-indigo-400 hover:bg-indigo-900/20'
+                  : 'text-gray-600 hover:text-indigo-600 hover:bg-indigo-50'
+              }`}
               title="Editar"
             >
               <Edit className="h-4 w-4" />
@@ -342,7 +382,11 @@ const Musicians: React.FC = () => {
                 console.log('🖱️ Botão Delete clicado! Musician ID:', musician.id);
                 handleDeleteMusician(musician.id);
               }}
-              className="p-2 text-zinc-400 hover:text-red-400 hover:bg-red-900/20 rounded-lg transition-colors"
+              className={`p-2 rounded-lg transition-colors ${
+                theme === 'dark'
+                  ? 'text-zinc-400 hover:text-red-400 hover:bg-red-900/20'
+                  : 'text-gray-600 hover:text-red-600 hover:bg-red-50'
+              }`}
               title="Excluir"
             >
               <Trash2 className="h-4 w-4" />
@@ -359,10 +403,14 @@ const Musicians: React.FC = () => {
       <div className="glass p-4 md:p-6">
         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
           <div className="flex items-center space-x-3 md:space-x-4">
-            <Users className="h-6 w-6 md:h-8 md:w-8 text-indigo-400" />
+            <Users className="h-6 w-6 md:h-8 md:w-8 text-indigo-500" />
             <div>
-              <h1 className="text-xl md:text-3xl font-bold text-zinc-100">Colaboradores</h1>
-              <p className="text-sm md:text-base text-zinc-400">Músicos, cantores e técnicos</p>
+              <h1 className={`text-xl md:text-3xl font-bold ${theme === 'dark' ? 'text-zinc-100' : 'text-gray-900'}`}>
+                Colaboradores
+              </h1>
+              <p className={`text-sm md:text-base ${theme === 'dark' ? 'text-zinc-400' : 'text-gray-600'}`}>
+                Músicos, cantores e técnicos
+              </p>
             </div>
           </div>
           <button
@@ -379,19 +427,31 @@ const Musicians: React.FC = () => {
       {/* Stats */}
       <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
         <div className="glass p-6 text-center">
-          <Guitar className="h-8 w-8 text-blue-400 mx-auto mb-2" />
-          <div className="text-2xl font-bold text-zinc-100">{instrumentMusicians.length}</div>
-          <div className="text-sm text-zinc-400">Músicos</div>
+          <Guitar className="h-8 w-8 text-blue-500 mx-auto mb-2" />
+          <div className={`text-2xl font-bold ${theme === 'dark' ? 'text-zinc-100' : 'text-gray-900'}`}>
+            {instrumentMusicians.length}
+          </div>
+          <div className={`text-sm ${theme === 'dark' ? 'text-zinc-400' : 'text-gray-600'}`}>
+            Músicos
+          </div>
         </div>
         <div className="glass p-6 text-center">
-          <Mic className="h-8 w-8 text-pink-400 mx-auto mb-2" />
-          <div className="text-2xl font-bold text-zinc-100">{vocals.length}</div>
-          <div className="text-sm text-zinc-400">Cantores</div>
+          <Mic className="h-8 w-8 text-pink-500 mx-auto mb-2" />
+          <div className={`text-2xl font-bold ${theme === 'dark' ? 'text-zinc-100' : 'text-gray-900'}`}>
+            {vocals.length}
+          </div>
+          <div className={`text-sm ${theme === 'dark' ? 'text-zinc-400' : 'text-gray-600'}`}>
+            Cantores
+          </div>
         </div>
         <div className="glass p-6 text-center">
-          <Volume2 className="h-8 w-8 text-yellow-400 mx-auto mb-2" />
-          <div className="text-2xl font-bold text-zinc-100">{soundTechnicians.length}</div>
-          <div className="text-sm text-zinc-400">Técnicos de Som</div>
+          <Volume2 className="h-8 w-8 text-yellow-500 mx-auto mb-2" />
+          <div className={`text-2xl font-bold ${theme === 'dark' ? 'text-zinc-100' : 'text-gray-900'}`}>
+            {soundTechnicians.length}
+          </div>
+          <div className={`text-sm ${theme === 'dark' ? 'text-zinc-400' : 'text-gray-600'}`}>
+            Técnicos de Som
+          </div>
         </div>
       </div>
 
@@ -400,30 +460,38 @@ const Musicians: React.FC = () => {
         <div className="flex flex-col md:flex-row gap-4">
           {/* Busca por nome */}
           <div className="flex-1">
-            <label className="block text-sm font-medium text-zinc-300 mb-2">
+            <label className={`block text-sm font-medium mb-2 ${theme === 'dark' ? 'text-zinc-300' : 'text-gray-700'}`}>
               Buscar por nome
             </label>
             <div className="relative">
-              <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-5 w-5 text-zinc-400" />
+              <Search className={`absolute left-3 top-1/2 transform -translate-y-1/2 h-5 w-5 ${theme === 'dark' ? 'text-zinc-400' : 'text-gray-500'}`} />
               <input
                 type="text"
                 placeholder="Digite o nome do colaborador..."
                 value={searchTerm}
                 onChange={(e) => setSearchTerm(e.target.value)}
-                className="w-full pl-10 pr-4 py-2 bg-zinc-800 border border-zinc-700 text-zinc-100 placeholder-zinc-500 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent"
+                className={`w-full pl-10 pr-4 py-2 border rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition-colors ${
+                  theme === 'dark'
+                    ? 'bg-zinc-800 border-zinc-700 text-zinc-100 placeholder-zinc-500'
+                    : 'bg-white border-gray-300 text-gray-900 placeholder-gray-400'
+                }`}
               />
             </div>
           </div>
 
           {/* Filtro por tipo */}
           <div className="md:w-64">
-            <label className="block text-sm font-medium text-zinc-300 mb-2">
+            <label className={`block text-sm font-medium mb-2 ${theme === 'dark' ? 'text-zinc-300' : 'text-gray-700'}`}>
               Filtrar por tipo
             </label>
             <select
               value={filterType}
               onChange={(e) => setFilterType(e.target.value as any)}
-              className="w-full px-3 py-2 bg-zinc-800 border border-zinc-700 text-zinc-100 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent"
+              className={`w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition-colors ${
+                theme === 'dark'
+                  ? 'bg-zinc-800 border-zinc-700 text-zinc-100'
+                  : 'bg-white border-gray-300 text-gray-900'
+              }`}
             >
               <option value="all">Todos</option>
               <option value="musicians">Músicos</option>
@@ -435,7 +503,7 @@ const Musicians: React.FC = () => {
 
         {/* Contador de resultados */}
         {(searchTerm || filterType !== 'all') && (
-          <div className="mt-4 text-sm text-zinc-400">
+          <div className={`mt-4 text-sm ${theme === 'dark' ? 'text-zinc-400' : 'text-gray-600'}`}>
             {(() => {
               const total = filteredInstrumentMusicians.length + filteredVocals.length + filteredSoundTechnicians.length;
               return `Mostrando ${total} colaborador${total !== 1 ? 'es' : ''}`;
@@ -447,7 +515,11 @@ const Musicians: React.FC = () => {
       {/* Formulário de Cadastro */}
       {isAddingMusician && (
         <div className="glass p-4 md:p-6">
-          <h2 className="text-xl md:text-2xl font-bold text-zinc-100 mb-4 md:mb-6">Cadastrar-se como Colaborador</h2>
+          <h2 className={`text-xl md:text-2xl font-bold mb-4 md:mb-6 ${
+            theme === 'dark' ? 'text-zinc-100' : 'text-gray-900'
+          }`}>
+            Cadastrar-se como Colaborador
+          </h2>
           <div className="space-y-4">
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <input
@@ -455,12 +527,20 @@ const Musicians: React.FC = () => {
                 placeholder="Nome e sobrenome"
                 value={newMusician.name}
                 onChange={(e) => setNewMusician({ ...newMusician, name: e.target.value })}
-                className="px-3 py-2 bg-zinc-800 border border-zinc-700 text-zinc-100 placeholder-zinc-500 rounded-lg focus:ring-2 focus:ring-indigo-500"
+                className={`px-3 py-2 border rounded-lg focus:ring-2 focus:ring-indigo-500 ${
+                  theme === 'dark'
+                    ? 'bg-zinc-800 border-zinc-700 text-zinc-100 placeholder-zinc-500'
+                    : 'bg-white border-gray-300 text-gray-900 placeholder-gray-400'
+                }`}
               />
               <select
                 value={newMusician.instrument}
                 onChange={(e) => setNewMusician({ ...newMusician, instrument: e.target.value as any })}
-                className="px-3 py-2 bg-zinc-800 border border-zinc-700 text-zinc-100 rounded-lg focus:ring-2 focus:ring-indigo-500"
+                className={`px-3 py-2 border rounded-lg focus:ring-2 focus:ring-indigo-500 ${
+                  theme === 'dark'
+                    ? 'bg-zinc-800 border-zinc-700 text-zinc-100'
+                    : 'bg-white border-gray-300 text-gray-900'
+                }`}
               >
                 <option value="Guitarra">Guitarra</option>
                 <option value="Violão">Violão</option>
@@ -474,19 +554,27 @@ const Musicians: React.FC = () => {
             <div className="space-y-4">
               <div className="flex items-center space-x-4">
                 <div className="flex-1">
-                  <label className="block text-sm font-medium text-zinc-300 mb-2">
+                  <label className={`block text-sm font-medium mb-2 ${
+                    theme === 'dark' ? 'text-zinc-300' : 'text-gray-700'
+                  }`}>
                     Foto (opcional)
                   </label>
                   <input
                     type="file"
                     accept="image/*"
                     onChange={handleFileChange}
-                    className="w-full px-3 py-2 bg-zinc-800 border border-zinc-700 text-zinc-100 rounded-lg focus:ring-2 focus:ring-indigo-500 file:mr-4 file:py-2 file:px-4 file:rounded-lg file:border-0 file:text-sm file:font-medium file:bg-indigo-600 file:text-white hover:file:bg-indigo-700"
+                    className={`w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-indigo-500 file:mr-4 file:py-2 file:px-4 file:rounded-lg file:border-0 file:text-sm file:font-medium file:bg-indigo-600 file:text-white hover:file:bg-indigo-700 ${
+                      theme === 'dark'
+                        ? 'bg-zinc-800 border-zinc-700 text-zinc-100'
+                        : 'bg-white border-gray-300 text-gray-900'
+                    }`}
                   />
                 </div>
-                <div className="text-zinc-400 text-sm">ou</div>
+                <div className={`text-sm ${theme === 'dark' ? 'text-zinc-400' : 'text-gray-600'}`}>ou</div>
                 <div className="flex-1">
-                  <label className="block text-sm font-medium text-zinc-300 mb-2">
+                  <label className={`block text-sm font-medium mb-2 ${
+                    theme === 'dark' ? 'text-zinc-300' : 'text-gray-700'
+                  }`}>
                     URL da foto
                   </label>
                   <input
@@ -494,7 +582,11 @@ const Musicians: React.FC = () => {
                     placeholder="https://exemplo.com/foto.jpg"
                     value={newMusician.photoUrl}
                     onChange={(e) => handleUrlChange(e.target.value)}
-                    className="w-full px-3 py-2 bg-zinc-800 border border-zinc-700 text-zinc-100 placeholder-zinc-500 rounded-lg focus:ring-2 focus:ring-indigo-500"
+                    className={`w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-indigo-500 ${
+                      theme === 'dark'
+                        ? 'bg-zinc-800 border-zinc-700 text-zinc-100 placeholder-zinc-500'
+                        : 'bg-white border-gray-300 text-gray-900 placeholder-gray-400'
+                    }`}
                   />
                 </div>
               </div>
@@ -505,9 +597,11 @@ const Musicians: React.FC = () => {
                   <img
                     src={photoPreview || newMusician.photoUrl}
                     alt="Preview"
-                    className="w-20 h-20 rounded-full object-cover border-2 border-zinc-600"
+                    className={`w-20 h-20 rounded-full object-cover border-2 ${
+                      theme === 'dark' ? 'border-zinc-600' : 'border-gray-300'
+                    }`}
                   />
-                  <div className="text-sm text-zinc-400">
+                  <div className={`text-sm ${theme === 'dark' ? 'text-zinc-400' : 'text-gray-600'}`}>
                     <p>Preview da foto</p>
                     <button
                       type="button"
@@ -515,7 +609,7 @@ const Musicians: React.FC = () => {
                         setPhotoPreview('');
                         setNewMusician({ ...newMusician, photoUrl: '' });
                       }}
-                      className="text-red-400 hover:text-red-300 mt-1"
+                      className="text-red-500 hover:text-red-600 mt-1 font-medium"
                     >
                       Remover foto
                     </button>
@@ -533,7 +627,11 @@ const Musicians: React.FC = () => {
               </button>
               <button
                 onClick={handleCancelAdd}
-                className="px-4 py-2 bg-zinc-700 hover:bg-zinc-600 text-zinc-100 rounded-lg transition-colors"
+                className={`px-4 py-2 rounded-lg transition-colors ${
+                  theme === 'dark'
+                    ? 'bg-zinc-700 hover:bg-zinc-600 text-zinc-100'
+                    : 'bg-gray-200 hover:bg-gray-300 text-gray-900'
+                }`}
               >
                 <X className="h-4 w-4 mr-2" />
                 Cancelar
@@ -546,11 +644,11 @@ const Musicians: React.FC = () => {
       {/* Músicos */}
       {showMusicians && (
         <div className="glass p-4 md:p-6">
-          <h2 className="text-xl md:text-2xl font-bold text-zinc-100 mb-4 md:mb-6 flex items-center">
-            <Guitar className="h-5 w-5 md:h-6 md:w-6 mr-2 md:mr-3 text-blue-400" />
+          <h2 className={`text-xl md:text-2xl font-bold mb-4 md:mb-6 flex items-center ${theme === 'dark' ? 'text-zinc-100' : 'text-gray-900'}`}>
+            <Guitar className="h-5 w-5 md:h-6 md:w-6 mr-2 md:mr-3 text-blue-500" />
             Músicos
             {filteredInstrumentMusicians.length !== instrumentMusicians.length && (
-              <span className="ml-2 text-sm text-zinc-400">
+              <span className={`ml-2 text-sm ${theme === 'dark' ? 'text-zinc-400' : 'text-gray-600'}`}>
                 ({filteredInstrumentMusicians.length} de {instrumentMusicians.length})
               </span>
             )}
@@ -566,8 +664,8 @@ const Musicians: React.FC = () => {
             </div>
           ) : (
             <div className="text-center py-8">
-              <Guitar className="h-12 w-12 text-zinc-400 mx-auto mb-4" />
-              <p className="text-zinc-400">
+              <Guitar className={`h-12 w-12 mx-auto mb-4 ${theme === 'dark' ? 'text-zinc-400' : 'text-gray-400'}`} />
+              <p className={theme === 'dark' ? 'text-zinc-400' : 'text-gray-600'}>
                 {searchTerm ? 'Nenhum músico encontrado com esse nome.' : 'Nenhum músico cadastrado ainda.'}
               </p>
             </div>
@@ -578,11 +676,11 @@ const Musicians: React.FC = () => {
       {/* Cantores */}
       {showVocals && (
         <div className="glass p-4 md:p-6">
-          <h2 className="text-xl md:text-2xl font-bold text-zinc-100 mb-4 md:mb-6 flex items-center">
-            <Mic className="h-5 w-5 md:h-6 md:w-6 mr-2 md:mr-3 text-pink-400" />
+          <h2 className={`text-xl md:text-2xl font-bold mb-4 md:mb-6 flex items-center ${theme === 'dark' ? 'text-zinc-100' : 'text-gray-900'}`}>
+            <Mic className="h-5 w-5 md:h-6 md:w-6 mr-2 md:mr-3 text-pink-500" />
             Cantores
             {filteredVocals.length !== vocals.length && (
-              <span className="ml-2 text-sm text-zinc-400">
+              <span className={`ml-2 text-sm ${theme === 'dark' ? 'text-zinc-400' : 'text-gray-600'}`}>
                 ({filteredVocals.length} de {vocals.length})
               </span>
             )}
@@ -595,8 +693,8 @@ const Musicians: React.FC = () => {
             </div>
           ) : (
             <div className="text-center py-8">
-              <Mic className="h-12 w-12 text-zinc-400 mx-auto mb-4" />
-              <p className="text-zinc-400">
+              <Mic className={`h-12 w-12 mx-auto mb-4 ${theme === 'dark' ? 'text-zinc-400' : 'text-gray-400'}`} />
+              <p className={theme === 'dark' ? 'text-zinc-400' : 'text-gray-600'}>
                 {searchTerm ? 'Nenhum cantor encontrado com esse nome.' : 'Nenhum cantor cadastrado ainda.'}
               </p>
             </div>
@@ -607,11 +705,11 @@ const Musicians: React.FC = () => {
       {/* Técnicos de Som */}
       {showTechnicians && (
         <div className="glass p-4 md:p-6">
-          <h2 className="text-xl md:text-2xl font-bold text-zinc-100 mb-4 md:mb-6 flex items-center">
-            <Volume2 className="h-5 w-5 md:h-6 md:w-6 mr-2 md:mr-3 text-yellow-400" />
+          <h2 className={`text-xl md:text-2xl font-bold mb-4 md:mb-6 flex items-center ${theme === 'dark' ? 'text-zinc-100' : 'text-gray-900'}`}>
+            <Volume2 className="h-5 w-5 md:h-6 md:w-6 mr-2 md:mr-3 text-yellow-500" />
             Técnicos de Som
             {filteredSoundTechnicians.length !== soundTechnicians.length && (
-              <span className="ml-2 text-sm text-zinc-400">
+              <span className={`ml-2 text-sm ${theme === 'dark' ? 'text-zinc-400' : 'text-gray-600'}`}>
                 ({filteredSoundTechnicians.length} de {soundTechnicians.length})
               </span>
             )}
@@ -624,8 +722,8 @@ const Musicians: React.FC = () => {
             </div>
           ) : (
             <div className="text-center py-8">
-              <Volume2 className="h-12 w-12 text-zinc-400 mx-auto mb-4" />
-              <p className="text-zinc-400">
+              <Volume2 className={`h-12 w-12 mx-auto mb-4 ${theme === 'dark' ? 'text-zinc-400' : 'text-gray-400'}`} />
+              <p className={theme === 'dark' ? 'text-zinc-400' : 'text-gray-600'}>
                 {searchTerm ? 'Nenhum técnico encontrado com esse nome.' : 'Nenhum técnico cadastrado ainda.'}
               </p>
             </div>
